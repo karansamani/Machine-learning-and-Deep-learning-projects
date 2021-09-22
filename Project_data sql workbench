@@ -1,0 +1,230 @@
+create schema INSURANCE;
+-- -------------------------------
+DROP TABLE Customer;
+
+CREATE TABLE Customer (
+  CustomerID varchar(255) not null primary key,
+  CustomerName varchar(255) not NULL,
+  DoB date,
+  City varchar(255),
+  State varchar(50),
+  PhoneNo varchar(255) unique 
+);
+select * from customer;
+-- --------------------------------
+DROP TABLE Vehicle;
+
+CREATE TABLE Vehicle (
+  VehicleNo varchar(255) primary key not null,
+  Model varchar(255) default NULL,
+  CustomerID varchar(255) not null,
+  Foreign key (CustomerID) references Customer (CustomerID) on delete cascade on update cascade
+);
+SELECT * from vehicle;
+-- ------------------------------
+DROP TABLE Policy;
+
+CREATE TABLE Policy (
+  PolicyNo mediumint not null primary key,
+  Premium varchar(100) not NULL,
+  Validity date not null,
+  CustomerID varchar(255) not null,
+  VehicleNo varchar(255) not null,
+  Foreign key (CustomerID) references Customer (CustomerID) on delete cascade on update cascade,
+  Foreign key (VehicleNo) references Vehicle (VehicleNo) on delete cascade on update cascade
+);
+SELECT * from policy;
+-- -------------------------
+DROP TABLE ClaimAnalyst;
+
+CREATE TABLE ClaimAnalyst (
+  ClaimAnalystID mediumint not null primary key,
+  Location varchar(255)
+);
+select * from ClaimAnalyst;
+-- -----------------------
+
+DROP TABLE Claim;
+
+CREATE TABLE Claim (
+  ClaimNo mediumint not null primary key,
+  Acc_location varchar(255),
+  Acc_date date,
+  Acc_time time,
+  CustomerID varchar(255) not null,
+  PolicyNo mediumint not null,
+  CID mediumint not null,
+  Foreign key (CustomerID) references Customer (CustomerID)  on delete cascade on update cascade,
+  Foreign key (PolicyNo) references Policy (PolicyNo) on delete cascade on update cascade,
+  Foreign key (CID) references ClaimAnalyst (ClaimAnalystID) on delete cascade on update cascade
+);
+
+select * from Claim;
+-- -----------------------------
+
+DROP TABLE Uses;
+
+CREATE TABLE Uses (
+  CID mediumint not null ,
+  PolicyNo mediumint not NULL,
+  Foreign key (CID) references ClaimAnalyst (ClaimAnalystID) on delete cascade on update cascade,
+  Foreign key (PolicyNo) references Policy (PolicyNo) on delete cascade on update cascade
+);
+select * from Uses;
+-- ---------------------
+DROP TABLE Payment;
+
+CREATE TABLE Payment (
+  ClaimNo mediumint not NULL,
+  PolicyNo mediumint not NULL,
+  CID mediumint not null,
+  CustomerID varchar(255) not null,
+  Payment_date date,
+  Amount mediumint,
+  Foreign key (ClaimNo) references Claim (ClaimNo) on delete cascade on update cascade,
+  Foreign key (PolicyNo) references Policy (PolicyNo) on delete cascade on update cascade,
+  Foreign key (CID) references ClaimAnalyst (ClaimAnalystID) on delete cascade on update cascade,
+  Foreign key (CustomerID) references Customer (CustomerID) on delete cascade on update cascade
+);
+
+-- -----------------------
+-- QUERIES
+/** Query to find customerID, name, vehicle no., policy no. and Amount paid greater than $2500.	 **/
+select p.customerID, c.customername, pol.VehicleNo, p.PolicyNo, p.Amount
+from customer c, policy pol, payment p
+where c.customerID=p.customerID 
+and pol.PolicyNo=p.PolicyNo
+and p.Amount>2500;
+
+-- ------------------------
+/** Query to find CustomerID, name, VehicleNo and model of those customers involved in more than 1 accident **/
+select c.customerID , c.customerName, v.VehicleNo, v.Model
+from customer c, vehicle v
+where c.customerID=v.customerID
+and  1 < (select count(*) 
+	from claim cl
+	where c.customerID=cl.customerID 
+    );
+    
+-- ---------------
+/** Query to find CustomerID, name, VehicleNo and model of those vehicles involved in more than 1 accident **/
+ 
+select c.customerID,  c.customerName, v.VehicleNo, v.Model, count(*) as AccidentCount
+from customer c, vehicle v, claim cl, policy pol
+where cl.policyNo=pol.policyNo
+and pol.vehicleno=v.vehicleno
+and v.customerid = c.customerid
+group by cl.policyNo
+having AccidentCount > 1;
+
+/** Query to get ClaimanalystID, VehicleNo, PolicyNo who worked on Claim no '129' **/
+select p.CID, p.PolicyNo, pol.VehicleNo
+from payment p, policy pol
+where pol.PolicyNo = p.policyNo
+and p.ClaimNo = 129;
+
+/** accident between <> <> dates and amount paid - in quarter bar graphs **/
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'localInstance@1';
+
+/**CYPHER 
+create(Anne:Customer{name:'Anne', ID:1, city:'New York'})
+create(Eric:Customer{name:'Eric', ID:2, city:'Boston'})
+create(William:Customer{name:'William', ID:3, city:'Boston'})
+create(Sam:Customer{name:'Sam', ID:4, city:'Seattle'})
+create(Bill:Customer{name:'Bill', ID:5, city:'New York'})
+
+create(MA12:Vehicle{VehicleNo:'MA12', Model:'Porsche'})
+create(MA23:Vehicle{VehicleNo:'MA23', Model:'Benz'})
+create(MA34:Vehicle{VehicleNo:'MA34', Model:'Audi'})
+create(MA45:Vehicle{VehicleNo:'MA45', Model:'Fiat'})
+create(MA56:Vehicle{VehicleNo:'MA56', Model:'BMW'})
+create(MA67:Vehicle{VehicleNo:'MA67', Model:'Honda'})
+create(MA78:Vehicle{VehicleNo:'MA78', Model:'Toyota'})
+create(MA89:Vehicle{VehicleNo:'MA89', Model:'Lexus'})
+create(MA90:Vehicle{VehicleNo:'MA90', Model:'Mazda'})
+
+create(Bronx:Accident{Location:'Bronx'})
+create(Cambridge:Accident{Location:'Cambridge'})
+create(Waltham:Accident{Location:'Waltham'})
+
+create(A1:Policy{Number:100,Premium:1000})
+create(B2:Policy{Number:200,Premium:1000})
+create(C3:Policy{Number:300,Premium:1200})
+create(D4:Policy{Number:400,Premium:1250})
+create(E5:Policy{Number:500,Premium:1300})
+create(F6:Policy{Number:600,Premium:1350})
+create(G7:Policy{Number:700,Premium:1500})
+create(H8:Policy{Number:800,Premium:1200})
+create(I9:Policy{Number:900,Premium:1900})
+
+
+
+create
+    (Anne)-[:OWNS]->(MA12),(Anne)-[:OWNS]->(MA23),(Anne)-[:OWNS]->(MA34),
+    (Eric)-[:OWNS]->(MA45),(Eric)-[:OWNS]->(MA56),
+    (William)-[:OWNS]->(MA67),(William)-[:OWNS]->(MA78),
+    (Sam)-[:OWNS]->(MA89),(Bill)-[:OWNS]->(MA90)
+
+
+create
+    (MA12)-[:INVOLVED_IN]->(Bronx),(MA12)-[:INVOLVED_IN]->(Cambridge),(MA12)-[:INVOLVED_IN]->(Waltham),
+    (MA23)-[:INVOLVED_IN]->(Bronx),(MA23)-[:INVOLVED_IN]->(Waltham),
+    (MA45)-[:INVOLVED_IN]->(Cambridge),
+    (MA56)-[:INVOLVED_IN]->(Cambridge),(MA56)-[:INVOLVED_IN]->(Waltham),
+    (MA78)-[:INVOLVED_IN]->(Bronx),(MA78)-[:INVOLVED_IN]->(Cambridge)
+    
+create
+    (MA12)-[:INSURED_BY]->(A1),
+    (MA23)-[:INSURED_BY]->(B2),
+    (MA34)-[:INSURED_BY]->(C3),
+    (MA45)-[:INSURED_BY]->(D4),
+    (MA56)-[:INSURED_BY]->(E5),
+    (MA67)-[:INSURED_BY]->(F6),
+    (MA78)-[:INSURED_BY]->(G7),
+    (MA89)-[:INSURED_BY]->(H8),
+    (MA90)-[:INSURED_BY]->(I9)
+
+    
+    
+return Anne, Eric, William, Sam, Bill,MA12, MA23, MA34, MA45,MA56,MA67,MA78,
+MA89,MA90, Bronx,Cambridge,Waltham,A1,B2,C3,D4,E5,F6,G7,H8,I9    
+    
+ Q1: Query to provide customer names with more than 1 vehicle   
+match (c:Customer)--(v:Vehicle)
+with  c,count(*) as VehicleCount
+where VehicleCount > 1 
+return distinct c.name, VehicleCount
+
+Q2: Query to obtain total premium paid by each customer
+match (c:Customer)--(v:Vehicle)--(p:Policy)
+with  c, sum(p.Premium) as TotalPremium
+return distinct c.name, TotalPremium
+
+Q3: Query to obtain total number of accidents by location
+match (v:Vehicle)--(a:Accident)
+with  a, count(*) as totalAccidentCount
+return distinct a.Location, totalAccidentCount
+
+Q4: Query to obtain all locations where a vehicle was involved in an accident
+match (v:Vehicle)--(a:Accident)
+with  v, collect(a.Location) as Locations
+return distinct  v.VehicleNo, Locations
+**/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

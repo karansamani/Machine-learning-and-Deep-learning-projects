@@ -1,0 +1,69 @@
+library(RMySQL)
+library(ggplot2)
+library(zoo)
+library(lubridate)
+library(dplyr)
+#
+mydb <- dbConnect(MySQL(), user = 'root', password = 'localInstance@1',
+                  dbname = 'insurance', host = 'localhost')
+#
+dbListTables(mydb)
+#
+dbListFields(mydb, 'customer')
+#
+rs <- dbSendQuery(mydb, "select p.customerID, c.customername, pol.VehicleNo, p.PolicyNo, p.Amount
+from customer c, policy pol, payment p
+where c.customerID=pol.customerID 
+and pol.PolicyNo=p.PolicyNo
+and p.Amount>2500")
+mydata <- dbFetch(rs)
+mydata
+#
+#### Find the top 5 accident locations and specify the count
+rs1 <- dbSendQuery(mydb, "select acc_location, count(*) as Acc_count
+                  from claim 
+                  group by acc_location
+                  order by Acc_count desc limit 5")
+mydata1 <- dbFetch(rs1)
+ggplot(mydata1, aes(x=acc_location, y=Acc_count)) + geom_bar(stat="identity",
+                                                            width = 0.5,fill="blue")+theme_light()
+#
+##### Find the total number of accidents by quarter
+rs2 <- dbSendQuery(mydb, "select acc_date from claim")
+mydata2 <- dbFetch(rs2)
+mydata2$acc_date <- as_date(mydata2$acc_date)
+mydata2$acc_date <- sort(mydata2$acc_date)
+
+mydata2 <- data.frame(as.yearqtr(mydata2$acc_date))
+names(mydata2) <- "Year_Quarter" 
+mydata2 <-  mydata2 %>%
+  group_by(Year_Quarter)%>% 
+  summarise(Number_of_records=n())%>%
+  arrange(desc(Number_of_records))
+
+ggplot(mydata2, aes(x=as.character(Year_Quarter), y=Number_of_records)) +
+xlab("Year by Quarter") + ylab("Total no. of accidents") +
+  geom_bar(stat="identity", width=0.5,fill="red")+theme_light()
+
+### Find the total quarterly amount paid by the company to its customers
+rs3 <- dbSendQuery(mydb, "select payment_date,amount from payment")
+mydata3 <- dbFetch(rs3)
+mydata3$payment_date <- as_date(mydata3$payment_date)
+mydata3$payment_date <- sort(mydata3$payment_date)
+
+mydata3[,1] <- as.yearqtr(mydata3$payment_date)
+colnames(mydata3)[1] <- "Year_Quarter" 
+# Group by quarter year and to get the sum of amount in a particular quarter
+total_amt <- aggregate(mydata3$amount, by=list(mydata3$Year_Quarter), FUN=sum)
+colnames(total_amt) <-c("Year_Quarter","Total payment from Company to Customers")
+
+ggplot(total_amt, aes(x=as.character(Year_Quarter), y=`Total payment from Company to Customers`)) +
+  xlab("Year by Quarter") + ylab("Total payment to Customers (in $)") +
+  geom_bar(stat="identity", width=0.5,fill="orange",color="brown")+
+  theme_dark()
+
+#
+dbClearResult(rs)
+#
+dbDisconnect(mydb)
+#
