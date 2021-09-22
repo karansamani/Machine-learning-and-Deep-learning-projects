@@ -1,0 +1,5 @@
+1. google colab :-
+    https://colab.research.google.com/drive/1_sPcXY0W-r2mgcYHLn_NlGq1IMWZ9LYR?usp=sharing#scrollTo=KVw4OE-flweH
+
+2.Github stinky:-
+    https://github.com/ds5110/stinky
