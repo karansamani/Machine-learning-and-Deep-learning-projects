@@ -1,0 +1,2018 @@
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+    !pip install datasets
+    !pip install datasets==1.0.2
+    !pip install tqdm==4.57.0
+
+         Looking in indexes:   https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+         Requirement already   satisfied: datasets in /usr/local/lib/python3.9/dist-packages (1.0.2)
+         Requirement already   satisfied: filelock in /usr/local/lib/python3.9/dist-packages (from datasets) (3.10.7)
+         Requirement already   satisfied: requests>=2.19.0 in /usr/local/lib/python3.9/dist-packages (from datasets) (2.27.1)
+         Requirement already   satisfied: tqdm>=4.27 in /usr/local/lib/python3.9/dist-packages (from datasets) (4.57.0)
+         Requirement already   satisfied: pandas in /usr/local/lib/python3.9/dist-packages (from datasets) (1.4.4)
+         Requirement already   satisfied: pyarrow>=0.17.1 in /usr/local/lib/python3.9/dist-packages (from datasets) (9.0.0)
+         Requirement already   satisfied: dill in /usr/local/lib/python3.9/dist-packages (from datasets) (0.3.6)
+         Requirement already   satisfied: xxhash in /usr/local/lib/python3.9/dist-packages (from datasets) (3.2.0)
+         Requirement already   satisfied: numpy>=1.17 in /usr/local/lib/python3.9/dist-packages (from datasets) (1.22.4)
+         Requirement already   satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets) (3.4)
+         Requirement already   satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets) (2.0.12)
+         Requirement already   satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets) (2022.12.7)
+         Requirement already   satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets) (1.26.15)
+         Requirement already   satisfied: python-dateutil>=2.8.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets) (2.8.2)
+         Requirement already   satisfied: pytz>=2020.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets) (2022.7.1)
+         Requirement already   satisfied: six>=1.5 in /usr/local/lib/python3.9/dist-packages (from python-dateutil>=2.8.1->pandas->datasets) (1.16.0)
+         Looking in indexes:   https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+         Requirement already   satisfied: datasets==1.0.2 in /usr/local/lib/python3.9/dist-packages (1.0.2)
+         Requirement already   satisfied: pyarrow>=0.17.1 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (9.0.0)
+         Requirement already   satisfied: tqdm>=4.27 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (4.57.0)
+         Requirement already   satisfied: filelock in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (3.10.7)
+         Requirement already   satisfied: xxhash in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (3.2.0)
+         Requirement already   satisfied: numpy>=1.17 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (1.22.4)
+         Requirement already   satisfied: requests>=2.19.0 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (2.27.1)
+         Requirement already   satisfied: dill in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (0.3.6)
+         Requirement already   satisfied: pandas in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (1.4.4)
+         Requirement already   satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets==1.0.2) (1.26.15)
+         Requirement already   satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets==1.0.2) (2.0.12)
+         Requirement already   satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets==1.0.2) (2022.12.7)
+         Requirement already   satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets==1.0.2) (3.4)
+         Requirement already   satisfied: pytz>=2020.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets==1.0.2) (2022.7.1)
+         Requirement already   satisfied: python-dateutil>=2.8.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets==1.0.2) (2.8.2)
+         Requirement already   satisfied: six>=1.5 in /usr/local/lib/python3.9/dist-packages (from python-dateutil>=2.8.1->pandas->datasets==1.0.2) (1.16.0)
+         Looking in indexes:   https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+         Requirement already   satisfied: tqdm==4.57.0 in /usr/local/lib/python3.9/dist-packages (4.57.0)
+
+
+    import os
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
+
+    !pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+
+         Looking in indexes:   https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/, https://download.pytorch.org/whl/cu116
+         Requirement already   satisfied: torch in /usr/local/lib/python3.9/dist-packages (1.9.0+cu111)
+         Requirement already   satisfied: torchvision in /usr/local/lib/python3.9/dist-packages (0.10.0+cu111)
+         Requirement already   satisfied: torchaudio in /usr/local/lib/python3.9/dist-packages (0.9.0)
+         Requirement already   satisfied: typing-extensions in /usr/local/lib/python3.9/dist-packages (from torch) (4.5.0)
+         Requirement already   satisfied: numpy in /usr/local/lib/python3.9/dist-packages (from torchvision) (1.22.4)
+         Requirement already   satisfied: pillow>=5.3.0 in /usr/local/lib/python3.9/dist-packages (from torchvision) (8.4.0)
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                    1/30
+4/18/23, 5:23 PM                                                                          T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+
+    from google.colab import drive
+    drive.mount('/content/drive')
+
+           Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount("/content/drive", force_remount=True).
+
+
+    !mkdir   '/content/drive/My      Drive/t5'
+    !mkdir   '/content/drive/My      Drive/t5/dataset'
+    !mkdir   '/content/drive/My      Drive/t5/model'
+    !mkdir   '/content/drive/My      Drive/t5/tokenizer'
+    !ls
+
+           mkdir:    cannot create   directory   ‘/content/drive/My   Drive/t5’: File exists
+           mkdir:    cannot create   directory   ‘/content/drive/My   Drive/t5/dataset’: File exists
+           mkdir:    cannot create   directory   ‘/content/drive/My   Drive/t5/model’: File exists
+           mkdir:    cannot create   directory   ‘/content/drive/My   Drive/t5/tokenizer’: File exists
+           drive     sample_data
+
+
+    !pip   install   --quiet   transformers==4.1.1
+    !pip   install   --quiet   tokenizers==0.9.4
+    !pip   install   --quiet   sentencepiece==0.1.94
+    !pip   install   --quiet   tqdm==4.57.0
+    !pip   install   --quiet   pytorch-lightning==1.2.10
+    !pip   install   --quiet   torchtext==0.10.0
+
+
+    !pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+
+           Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+           Looking in links: https://download.pytorch.org/whl/torch_stable.html
+           Requirement already satisfied: torch==1.9.0+cu111 in /usr/local/lib/python3.9/dist-packages (1.9.0+cu111)
+           Requirement already satisfied: torchvision==0.10.0+cu111 in /usr/local/lib/python3.9/dist-packages (0.10.0+cu111)
+           Requirement already satisfied: torchaudio==0.9.0 in /usr/local/lib/python3.9/dist-packages (0.9.0)
+           Requirement already satisfied: typing-extensions in /usr/local/lib/python3.9/dist-packages (from torch==1.9.0+cu111) (4.5.0)
+           Requirement already satisfied: pillow>=5.3.0 in /usr/local/lib/python3.9/dist-packages (from torchvision==0.10.0+cu111) (8.4.0)
+           Requirement already satisfied: numpy in /usr/local/lib/python3.9/dist-packages (from torchvision==0.10.0+cu111) (1.22.4)
+
+
+    !pip install pytorch_lightning
+    !pip install transformers
+
+           Looking in indexes:       https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+           Requirement already       satisfied: pytorch_lightning in /usr/local/lib/python3.9/dist-packages (1.2.10)
+           Requirement already       satisfied: fsspec[http]>=0.8.1 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (2023.3.0)
+           Requirement already       satisfied: packaging in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (23.0)
+           Requirement already       satisfied: tensorboard!=2.5.0,>=2.2.0 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (2.12.1)
+           Requirement already       satisfied: tqdm>=4.41.0 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (4.57.0)
+           Requirement already       satisfied: future>=0.17.1 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (0.18.3)
+           Requirement already       satisfied: numpy>=1.16.6 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (1.22.4)
+           Requirement already       satisfied: PyYAML!=5.4.*,>=5.1 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (6.0)
+           Requirement already       satisfied: torchmetrics==0.2.0 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (0.2.0)
+           Requirement already       satisfied: torch>=1.4 in /usr/local/lib/python3.9/dist-packages (from pytorch_lightning) (1.9.0+cu111)
+           Requirement already       satisfied: requests in /usr/local/lib/python3.9/dist-packages (from fsspec[http]>=0.8.1->pytorch_lightning) (2.27.1)
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                              2/30
+4/18/23, 5:23 PM                                                                  T5_NLP_Project_Q&A.ipynb - Colaboratory
+         Requirement already    satisfied: aiohttp!=4.0.0a0,!=4.0.0a1 in /usr/local/lib/python3.9/dist-packages (from fsspec[http]>=0.8.1->pytorch_lightning) (3.8.4)
+         Requirement already    satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (2.17.1)
+         Requirement already    satisfied: google-auth-oauthlib<1.1,>=0.5 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (1.0
+         Requirement already    satisfied: absl-py>=0.4 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (1.4.0)
+         Requirement already    satisfied: tensorboard-plugin-wit>=1.6.0 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (1.8.
+         Requirement already    satisfied: grpcio>=1.48.2 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (1.53.0)
+         Requirement already    satisfied: markdown>=2.6.8 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (3.4.3)
+         Requirement already    satisfied: setuptools>=41.0.0 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (67.6.1)
+         Requirement already    satisfied: tensorboard-data-server<0.8.0,>=0.7.0 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightnin
+         Requirement already    satisfied: wheel>=0.26 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (0.40.0)
+         Requirement already    satisfied: protobuf>=3.19.6 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (3.20.3)
+         Requirement already    satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.9/dist-packages (from tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (2.2.3)
+         Requirement already    satisfied: typing-extensions in /usr/local/lib/python3.9/dist-packages (from torch>=1.4->pytorch_lightning) (4.5.0)
+         Requirement already    satisfied: charset-normalizer<4.0,>=2.0 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pyto
+         Requirement already    satisfied: frozenlist>=1.1.1 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytorch_lightni
+         Requirement already    satisfied: async-timeout<5.0,>=4.0.0a3 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytor
+         Requirement already    satisfied: attrs>=17.3.0 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytorch_lightning)
+         Requirement already    satisfied: aiosignal>=1.1.2 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytorch_lightnin
+         Requirement already    satisfied: yarl<2.0,>=1.0 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytorch_lightning)
+         Requirement already    satisfied: multidict<7.0,>=4.5 in /usr/local/lib/python3.9/dist-packages (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]>=0.8.1->pytorch_light
+         Requirement already    satisfied: six>=1.9.0 in /usr/local/lib/python3.9/dist-packages (from google-auth<3,>=1.6.3->tensorboard!=2.5.0,>=2.2.0->pytorch_lightning) (
+         Requirement already    satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.9/dist-packages (from google-auth<3,>=1.6.3->tensorboard!=2.5.0,>=2.2.0->pytorch_l
+         Requirement already    satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.9/dist-packages (from google-auth<3,>=1.6.3->tensorboard!=2.5.0,>=2.2.0->pytorch_
+         Requirement already    satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.9/dist-packages (from google-auth<3,>=1.6.3->tensorboard!=2.5.0,>=2.2.0->pytorch_lightning
+         Requirement already    satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.9/dist-packages (from google-auth-oauthlib<1.1,>=0.5->tensorboard!=2.5.0,>=2.2.
+         Requirement already    satisfied: importlib-metadata>=4.4 in /usr/local/lib/python3.9/dist-packages (from markdown>=2.6.8->tensorboard!=2.5.0,>=2.2.0->pytorch_light
+         Requirement already    satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests->fsspec[http]>=0.8.1->pytorch_lightning) (3.4)
+         Requirement already    satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.9/dist-packages (from requests->fsspec[http]>=0.8.1->pytorch_lightning) (2022.12.7)
+         Requirement already    satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.9/dist-packages (from requests->fsspec[http]>=0.8.1->pytorch_lightning) (1.26.15)
+         Requirement already    satisfied: MarkupSafe>=2.1.1 in /usr/local/lib/python3.9/dist-packages (from werkzeug>=1.0.1->tensorboard!=2.5.0,>=2.2.0->pytorch_lightning)
+         Requirement already    satisfied: zipp>=0.5 in /usr/local/lib/python3.9/dist-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard!=2.5.0,>=2.2.0->py
+         Requirement already    satisfied: pyasn1<0.5.0,>=0.4.6 in /usr/local/lib/python3.9/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard!=2.
+         Requirement already    satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.9/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<1.1,>=0.5->tensorbo
+         Looking in indexes:    https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+         Requirement already    satisfied: transformers in /usr/local/lib/python3.9/dist-packages (4.1.1)
+         Requirement already    satisfied: packaging in /usr/local/lib/python3.9/dist-packages (from transformers) (23.0)
+         Requirement already    satisfied: numpy in /usr/local/lib/python3.9/dist-packages (from transformers) (1.22.4)
+         Requirement already    satisfied: regex!=2019.12.17 in /usr/local/lib/python3.9/dist-packages (from transformers) (2022.10.31)
+         Requirement already    satisfied: sacremoses in /usr/local/lib/python3.9/dist-packages (from transformers) (0.0.53)
+         Requirement already    satisfied: requests in /usr/local/lib/python3.9/dist-packages (from transformers) (2.27.1)
+         Requirement already    satisfied: filelock in /usr/local/lib/python3.9/dist-packages (from transformers) (3.10.7)
+         Requirement already    satisfied: tokenizers==0.9.4 in /usr/local/lib/python3.9/dist-packages (from transformers) (0.9.4)
+         Requirement already    satisfied: tqdm>=4.27 in /usr/local/lib/python3.9/dist-packages (from transformers) (4.57.0)
+         Requirement already    satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests->transformers) (3.4)
+
+
+    # restart runtime
+    import os
+
+    def restart_runtime():
+      os.kill(os.getpid(), 9)
+
+    restart_runtime()
+
+
+    !nvidia-smi
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                              3/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+         Sat Apr 8 21:26:09 2023
+         +-----------------------------------------------------------------------------+
+         | NVIDIA-SMI 525.85.12    Driver Version: 525.85.12    CUDA Version: 12.0     |
+         |-------------------------------+----------------------+----------------------+
+         | GPU Name         Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+         | Fan Temp Perf Pwr:Usage/Cap|            Memory-Usage | GPU-Util Compute M. |
+         |                               |                      |               MIG M. |
+         |===============================+======================+======================|
+         |   0 NVIDIA A100-SXM... Off | 00000000:00:04.0 Off |                       0 |
+         | N/A   35C    P0    44W / 400W |      0MiB / 40960MiB |      0%      Default |
+         |                               |                      |             Disabled |
+         +-------------------------------+----------------------+----------------------+
+
+         +-----------------------------------------------------------------------------+
+         | Processes:                                                                  |
+         | GPU    GI   CI        PID   Type   Process name                  GPU Memory |
+         |        ID   ID                                                   Usage      |
+         |=============================================================================|
+         | No running processes found                                                  |
+         +-----------------------------------------------------------------------------+
+
+
+    import datasets
+    from datasets import load_dataset
+    import pandas as pd
+    import time
+    import random
+
+    import argparse
+    import pandas as pd
+    import numpy as np
+    import torch
+    from torch.utils.data import Dataset, DataLoader
+    import pytorch_lightning as pl
+
+    from transformers import (
+        AdamW,
+        T5ForConditionalGeneration,
+        T5Tokenizer,
+        get_linear_schedule_with_warmup
+    )
+
+    from transformers import T5ForConditionalGeneration,T5Tokenizer
+
+    pl.seed_everything(42)
+
+         INFO:pytorch_lightning.utilities.seed:Global seed set to 42
+         42
+
+
+    torch.__version__
+
+         '1.9.0+cu111'
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true   4/30
+4/18/23, 5:23 PM                                                                      T5_NLP_Project_Q&A.ipynb - Colaboratory
+    pl.__version__
+
+         '1.2.10'
+
+
+    dataset = load_dataset('squad')
+    print(dataset)
+
+
+          Downloading:                                       5.24k/? [00:00<00:00, 388kB/s]
+
+          Downloading:                                       2.19k/? [00:00<00:00, 129kB/s]
+         Downloading and preparing dataset squad/plain_text (download: 33.51 MiB, generated: 85.75 MiB, post-processed
+          Downloading:                                       30.3M/? [00:00<00:00, 86.6MB/s]
+
+          Downloading:                                       4.85M/? [00:00<00:00, 77.2MB/s]
+
+              85652/0 [00:04<00:00, 27441.87 examples/s]
+
+              8557/0 [00:00<00:00, 23291.76 examples/s]
+         Dataset squad downloaded and prepared to /root/.cache/huggingface/datasets/squad/plain_text/1.0.0/1244d044b266
+         DatasetDict({'train': Dataset(features: {'id': Value(dtype='string', id=None), 'title': Value(dtype='string',
+
+
+
+
+    print(dataset['train'][0])
+
+         {'answers': {'answer_start': [515], 'text': ['Saint Bernadette Soubirous']}, 'context': 'Architecturally, the school has a Catholic character. Atop the Main Buildi
+
+
+
+    # Access the context and question of the first example
+    context = dataset['train'][0]['context']
+    question = dataset['train'][0]['question']
+
+    print('Context:', context)
+    print()
+    print('Question:', question)
+
+
+         Context: Architecturally, the school has a Catholic character. Atop the Main Building's gold dome is a golden statue of the Virgin Mary. Immediately in front of th
+
+         Question: To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?
+
+
+
+    train_data = dataset['train']
+    train_data
+
+         Dataset(features: {'id': Value(dtype='string', id=None), 'title': Value(dtype='string', id=None), 'context': Value(dtype='string', id=None), 'question':
+         Value(dtype='string', id=None), 'answers': Sequence(feature={'text': Value(dtype='string', id=None), 'answer_start': Value(dtype='int32', id=None)}, length=-1,
+         id=None)}, num_rows: 87599)
+
+
+    len(train_data)
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                             5/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+         87599
+
+
+    print(train_data[0]['context'])
+    print(train_data[0]['question'])
+    print(train_data[0]['answers']['text'][0])
+
+         Architecturally, the school has a Catholic character. Atop the Main Building's gold dome is a golden statue of the Virgin Mary. Immediately in front of the Main Bu
+         To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?
+         Saint Bernadette Soubirous
+
+
+
+    print(train_data[99]['context'])
+
+
+         One of the main driving forces in the growth of the University was its football team, the Notre Dame Fighting Irish. Knute Rockne became head coach in 1918. Under
+
+
+
+    %%time
+    context = []
+    question = []
+    answer = []
+
+    for i in range(len(train_data)):
+
+        context.append(train_data[i]['context'])
+        question.append(train_data[i]['question'])
+        answer.append(train_data[i]['answers']['text'][0])
+
+         CPU times: user 12 s, sys: 61.7 ms, total: 12.1 s
+         Wall time: 12 s
+
+
+    print(len(context))
+    print(len(question))
+    print(len(answer))
+
+         87599
+         87599
+         87599
+
+
+    df = pd.DataFrame(list(zip(context,question,answer)), columns=['context','question','answer'])
+    df
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                           6/30
+4/18/23, 5:23 PM                                                                                     T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                                                       context                                        question                             answer
+
+                       Architecturally, the school has a Catholic      To whom did the Virgin Mary allegedly
+              0                                                                                                       Saint Bernadette Soubirous
+                                                           cha...                                 appear i...
+
+                       Architecturally, the school has a Catholic     What is in front of the Notre Dame Main
+              1                                                                                                          a copper statue of Christ
+                                                           cha...                                    Building?
+
+                       Architecturally, the school has a Catholic    The Basilica of the Sacred heart at Notre
+              2                                                                                                                 the Main Building
+                                                           cha...                                     Dame...
+
+                       Architecturally, the school has a Catholic                                                    a Marian place of prayer and
+              3                                                            What is the Grotto at Notre Dame?
+                                                           cha...                                                                        reflection
+
+                       Architecturally, the school has a Catholic     What sits on top of the Main Building at       a golden statue of the Virgin
+              4
+                                                           cha...                                     Notre...                              Mary
+    df.shape...                                                ...                                             ...                               ...
+
+           (87599, 3) Kathmandu Metropolitan City (KMC), in              In what US state did Kathmandu first
+            87594                                                                                                                          Oregon
+                                                  order to...                                     establish...
+
+    df = df[:4000]  Kathmandu
+                   #we         Metropolitan
+                        take first          City (KMC),
+                                    4000 examples        in
+                                                      only
+          87595                                                      What was Yangon previously known as?                                Rangoon
+                                                 order to...
+
+    df.shape            K th     d M t       lit   Cit (KMC) i               With   h tB l       i      it d
+
+           (4000, 3)
+
+
+    maxm = 0
+    for i in range(df.shape[0]):
+      txt = df['context'][i] + ' ' + df['question'][i]
+      total_len = len(txt.split())
+      if total_len > maxm:
+         maxm = total_len
+
+
+
+
+    maxm
+
+           512
+
+
+    from sklearn.model_selection import train_test_split
+
+    train, test = train_test_split(df, test_size=0.2, random_state=42)
+
+
+    len(test)
+
+           800
+
+
+    len(train)
+
+           3200
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                         7/30
+4/18/23, 5:23 PM                                                                                       T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+
+
+    test, valid = train_test_split(test, test_size=0.2, random_state=42) #validation split
+
+
+    len(test)
+
+            640
+
+
+    len(valid)
+
+            160
+
+
+    train.reset_index(drop=True,inplace=True)
+    valid.reset_index(drop=True,inplace=True)
+    test.reset_index(drop=True,inplace=True)
+
+
+
+
+    train
+
+
+                                                                  context                                                  question                  answer
+
+              0          In the 1970s, job losses due to industrial res...           In what decade did the crime rate drop signifi...                 1990s
+
+              1     Beyoncé's second solo album B'Day was released...              How many albums did Beyonce sell in the first ...                 541,000
+
+              2        On release, Twilight Princess was considered t...           What 2 critics suggested the game had blurry t...      IGN and GameSpy
+
+              3        Genocide has become an official term used in i...                 Who referred to acts of genocide in 1941?          Winston Churchill
+
+              4      In 2011, documents obtained by WikiLeaks revea...                         Who did she tell about the donation?       The Huffington Post
+
+              ...                                                        ...                                                        ...                    ...
+
+             3195          English is the official language in the state ...   What is the second most common language spoken...                     Spanish
+
+             3196      Slobodan Milošević, as the former President of...          Which former president was by far the most sen...       Slobodan Milošević
+
+             3197    Beyoncé's work has influenced numerous artists...             Which rock band cited Beyonce on their third a...           White Rabbits
+
+             3198        News reports indicate that the poorer, rural v...          What part of China did the earthquake occur in?                 rural part
+
+             3199      Following filming in Mexico, and during a sche...                           When did Craig go back to work?                   22 April
+
+            3200 rows × 3 columns
+
+
+
+    test
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                   8/30
+4/18/23, 5:23 PM                                                                                          T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                                                                   context                                                  question                              answer
+
+              0           At the age of 21 he settled in Paris. Thereaft...       What is the name of the woman he had a relatio...                    Maria Wodzińska
+
+              1             At the time of its release, Twilight Princess ...      Under which brand was Twilight Princess for th...                   Nintendo Selects
+
+              2           The first draft of the Convention included pol...           Which provision was initially included in the ...                  political killings
+
+              3     At the 57th Annual Grammy Awards in February 2...            Beyonce would perform with who at Superbowl 50?                                Coldplay
+
+              4          After gaining the Master Sword, Link is cleans...                           Who did Zant form a pact with?                           Ganondorf
+
+             ...                                                          ...                                                       ...                                 ...
+
+             635        In the United Kingdom, the film grossed £4.1 m...             How much did Spectre make in its first week?          £41.7 million ($63.8 million)
+
+             636          The Joan B. Kroc Institute for International P...                      What company did Ray Kroc own?                              McDonald's
+
+             637   At the 52nd Annual Grammy Awards, Beyoncé rece...               Beyoncé was a featured artist on which singer'...                         Lady Gaga
+
+             638      As of 2012[update] research continued in many ...               The Kellogg Institute for International Studie...                     Notre Dame
+
+             639         The Ming dynasty granted titles to lamas of sc...         Who invited Je Tsongkhapa to come pay tribute?               the Ming Yongle Emperor
+    valid
+            640 rows × 3 columns
+                                                                   context                                                     question                                                      answer
+
+              0      Throughout the following month, the Yongle Emp...           Who did Deshin Shekpa persuade the Yongle Empe...              religious leaders of other Tibetan Buddhist sects
+
+              1       The most precarious of these quake-lakes was t...               How many soldiers had to travel to the area by...                                                        1,200
+
+              2             Office buildings in Shanghai's financial distr...                            When did the airport re-open?                                                       May 12
+
+              3            Wylie asserts that this type of censorship of ...             Regardless of their sectarian affiliations, wh...                                            various lamas
+
+              4          Francis Marcus of the International Federation...           What did Francis Marcus say of the Chinese rel...                                        swift and very efficient
+
+             ...                                                           ...                                                            ...                                                      ...
+
+             155      Notre Dame teams are known as the Fighting Iri...              There is a conference that the male hockey tea...                                                  Hockey East
+
+             156         In 1827, soon after the death of Chopin's youn...          What year did Frédéric leave Warsaw after movi...                                                           1830
+
+             157         The iTunes Store (introduced April 29, 2003) i...             When did Apple begin selling entire films thro...                                       September 12, 2006
+
+             158      The first generation iPod Nano may overheat an...              What part of the iPod Nano was the cause of th...                                                        battery
+
+             159   Beyoncé embarked on The Mrs. Carter Show World...                                           When did the tour begin?                                                      April 15
+
+            160 rows × 3 columns
+
+
+
+    print(df.shape)
+    print(train.shape)
+    print(valid.shape)
+    print(test.shape)
+
+            (4000, 3)
+            (3200, 3)
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                                           9/30
+4/18/23, 5:23 PM                                                                    T5_NLP_Project_Q&A.ipynb - Colaboratory
+           (160, 3)
+           (640, 3)
+
+
+    #   inheriting 2 classes from pytorch ==> dataset, t5tuner
+    #   we are directly using t5tuner class
+    #   but, we are not directly using dataset class,
+    #   we are taking help of dataset class to generate data which is compatible with pytorch and which
+    #   can be used in t5tuner.
+
+    # T5 from hugging face is pytorch based, so in that case if data is not pytorch compatible,
+    # it will have difficulty in generating graph, which inturn is helpful in back propagation.
+
+
+    Preparing Dataset
+
+
+    from tqdm.notebook import tqdm
+    import copy
+
+    class AnswerGenerationDataset(Dataset):
+        def __init__(self, tokenizer, dataframe, max_len_inp=512,max_len_out=100):
+
+             self.passage_column = "context"
+             self.answer = "answer"
+             self.question = "question"
+
+             # self.data = pd.read_csv(self.path)
+             self.data = dataframe.copy()
+
+
+
+
+              self.max_len_input = max_len_inp
+              self.max_len_output = max_len_out
+              self.tokenizer = tokenizer
+              self.inputs = []
+              self.targets = []
+              self.skippedcount =0
+              self._build()
+          def __len__(self):
+              return len(self.inputs)
+          def __getitem__(self, index):
+              source_ids = self.inputs[index]["input_ids"].squeeze() #json format
+              target_ids = self.targets[index]["input_ids"].squeeze()
+
+             src_mask = self.inputs[index]["attention_mask"].squeeze() # might need to squeeze
+             target_mask = self.targets[index]["attention_mask"].squeeze() # might need to squeeze
+
+             labels = copy.deepcopy(target_ids)
+             labels [labels==0] = -100 #making 0 to -100 for mask
+
+              return {"source_ids": source_ids, "source_mask": src_mask, "target_ids": target_ids, "target_mask": target_mask,"labels":labels}
+          def _build(self):
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                   10/30
+4/18/23, 5:23 PM                                                                  T5_NLP_Project_Q&A.ipynb - Colaboratory
+             for idx in tqdm(range(len(self.data))):
+
+                   question,context,target = self.data.loc[idx, self.question],self.data.loc[idx, self.passage_column], self.data.loc[idx, self.answer]
+
+                   input_ = f'question: {question} \n\n context: {context} </s>'
+                   target = " %s </s>" % (str(target)) #crux
+                   #input = f'Summarization : {paragraph} </s>"
+                   # get encoding length of input. If it is greater than self.max_len skip it
+                   test_input_encoding = self.tokenizer.encode_plus(input_,   #tokenizing the train data
+                                               truncation=True,
+                                               return_tensors="pt")
+
+                   length_of_input_encoding = len(test_input_encoding['input_ids'][0])
+
+                   tokenized_inputs = self.tokenizer.batch_encode_plus(
+                       [input_], max_length=self.max_len_input, pad_to_max_length=True, return_tensors="pt",truncation=True
+                   )
+                   # tokenize targets
+                   tokenized_targets = self.tokenizer.batch_encode_plus(
+                       [target], max_length=self.max_len_output, pad_to_max_length=True,return_tensors="pt",truncation=True
+                   )
+                   self.inputs.append(tokenized_inputs)
+                   self.targets.append(tokenized_targets)
+
+
+
+
+    T5 Finetuner
+
+
+    class T5FineTuner(pl.LightningModule):
+        def __init__(self,hparams, t5model, t5tokenizer,train_dataset,validation_dataset):
+            super(T5FineTuner, self).__init__()
+            self.hparams = hparams
+            self.model = t5model
+            # self.tokenizer = t5tokenizer
+            self.validation_dataset = validation_dataset
+            self.train_dataset = train_dataset
+
+        def forward( self, input_ids, attention_mask=None, decoder_input_ids=None, decoder_attention_mask=None, lm_labels=None):
+             outputs = self.model(
+                 input_ids=input_ids,
+                 attention_mask=attention_mask,
+                 decoder_attention_mask=decoder_attention_mask,
+                 labels=lm_labels,
+            )
+              return outputs
+
+
+
+        def training_step(self, batch, batch_idx):
+            outputs = self.forward(
+                input_ids=batch["source_ids"],
+                attention_mask=batch["source_mask"],
+                decoder_input_ids = batch["target_ids"],
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                            11/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+                          _ p _             [    g _     ],
+                   decoder_attention_mask=batch['target_mask'],
+                   lm_labels=batch['labels']
+             )
+             loss = outputs[0]
+             self.log('train_loss',loss)
+             return loss
+
+        def validation_step(self, batch, batch_idx):
+            outputs = self.forward(
+                input_ids=batch["source_ids"],
+                attention_mask=batch["source_mask"],
+                decoder_input_ids = batch["target_ids"],
+                decoder_attention_mask=batch['target_mask'],
+                lm_labels=batch['labels']
+            )
+            loss = outputs[0]
+            self.log("val_loss",loss)
+            return loss
+
+        def train_dataloader(self):
+            return DataLoader(self.train_dataset, batch_size=self.hparams.batch_size,num_workers=4)
+
+
+
+        def val_dataloader(self):
+            return DataLoader(self.validation_dataset, batch_size=self.hparams.batch_size,num_workers=4)
+
+
+
+
+        def configure_optimizers(self):
+            optimizer = AdamW(self.parameters(), lr=3e-4, eps=1e-8)
+            return optimizer
+
+
+
+
+    def dataset_creation_and_training(saved_model_path,saved_trained_tokenizer,train_dataframe,test_dataframe,t5_tokenizer,t5_model,epochs):
+
+          print(f'Preparing the Train_Dataset')
+          train_dataset = AnswerGenerationDataset(t5_tokenizer,train_dataframe)
+          print(f'training_dataset: {train_dataset}')
+          print('training dataset generation completed')
+          print(f'Preparing the Validation_Dataset')
+          validation_dataset = AnswerGenerationDataset(t5_tokenizer,test_dataframe)
+          print(f'validation_datasets: {validation_dataset}')
+
+
+
+
+          args_dict = dict(
+              batch_size=4,
+          )
+
+             args = argparse.Namespace(**args dict)
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                 12/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+            args   argparse.Namespace(   args_dict)
+
+
+
+          model = T5FineTuner(args,t5_model,t5_tokenizer,train_dataset,validation_dataset)
+
+          trainer = pl.Trainer(max_epochs = epochs, gpus=1,progress_bar_refresh_rate=30)
+          #trainer = pl.Trainer(max_epochs = 1,progress_bar_refresh_rate=30)
+
+
+
+          trainer.fit(model) #it trains here
+
+          print ("Saving model")
+          save_path_model = saved_model_path
+          save_path_tokenizer = saved_trained_tokenizer
+          model.model.save_pretrained(save_path_model)
+          t5_tokenizer.save_pretrained(save_path_tokenizer)
+
+
+    def generate_answers(text,tokenizer,model,device):
+
+
+
+        encoding = tokenizer.encode_plus(text,max_length =512, padding=True, return_tensors="pt")
+        input_ids,attention_mask = encoding["input_ids"].to(device), encoding["attention_mask"].to(device) #ask to print this
+
+        model.eval()
+        beam_outputs = model.generate(
+            input_ids=input_ids,attention_mask=attention_mask,
+            max_length=72,
+            early_stopping=True,
+            num_beams=5,
+            num_return_sequences=3
+
+        )
+        #print(beam_outputs)
+        answer = tokenizer.decode(beam_outputs[0], skip_special_tokens=True,clean_up_tokenization_spaces=True)
+
+        return answer
+
+
+    def preprocess_test_df(df):
+        # columns ==> answer, question, context
+        df['text'] = "question: "+ df['question'] + ' ' + "\n\n"+ ' ' + "context: " + df['context'] + " </s>"
+        # columns ==> text, answer, question, context
+        return df
+
+
+    def predict_answers(df ,tokenizer,model,device):
+
+      df = preprocess_test_df(df)
+      answers = []
+
+      for i in range(df.shape[0]):
+          text = df.loc[i,'text']
+          original_answer = df.loc[i,'answer']
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true   13/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+          question = df.loc[i,'question']
+          new_answer = generate_answers(text ,tokenizer,model,device)
+          ans = answers.append(new_answer)
+          # text, answer, question , context, generated_answer
+
+      df['Generated_answer'] = np.array(answers)
+
+
+
+      return df
+
+
+    def predicting_schedule(test_df,saved_model_path,saved_trained_tokenizer,model_name,df_type,device):
+
+      model = T5ForConditionalGeneration.from_pretrained(saved_model_path)
+      tokenizer = T5Tokenizer.from_pretrained(saved_trained_tokenizer)
+
+      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+      print ("device ",device)
+      model = model.to(device)
+
+      df_answer = predict_answers(test_df ,tokenizer,model,device)
+
+      return df_answer
+
+
+    def training_schedule(saved_model_path,saved_trained_tokenizer,train_dataframe,test_dataframe,t5_tokenizer,t5_model,epochs):
+
+      dataset_creation_and_training(saved_model_path,saved_trained_tokenizer,train_dataframe,test_dataframe,t5_tokenizer,t5_model,epochs)
+
+
+
+    %%time
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelWithLMHead
+
+    saved_model_path = '/content/drive/My Drive/t5/model/'
+    saved_trained_tokenizer = '/content/drive/My Drive/t5/tokenizer/'
+
+    epochs = 2
+    df_type = 'predicted_answer' #used in predicting_schedule
+
+    model_name = "t5-base"
+
+    t5_tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    t5_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+
+    training_schedule(saved_model_path,saved_trained_tokenizer,train,valid,t5_tokenizer,t5_model,epochs) #to the function
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true              14/30
+4/18/23, 5:23 PM                                                                           T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+          Downloading: 100%                                          1.21k/1.21k [00:00<00:00, 69.7kB/s]
+
+          Downloading: 100%                                          792k/792k [00:00<00:00, 2.39MB/s]
+
+          Downloading: 100%                                          1.39M/1.39M [00:00<00:00, 3.95MB/s]
+
+          Downloading: 100%                                          892M/892M [00:11<00:00, 79.0MB/s]
+         Some weights of the model checkpoint at t5-base were not used when initializing T5ForConditionalGeneration: ['decoder.block.0.layer.1.EncDecAttention.relative_atte
+         - This IS expected if you are initializing T5ForConditionalGeneration from the checkpoint of a model trained on another task or with another architecture (e.g. ini
+         - This IS NOT expected if you are initializing T5ForConditionalGeneration from the checkpoint of a model that you expect to be exactly identical (initializing a Be
+         Preparing the Train_Dataset
+          100%                                         3200/3200 [00:06<00:00, 530.88it/s]
+         /usr/local/lib/python3.9/dist-packages/transformers/tokenization_utils_base.py:2173: FutureWarning: The `pad_to_max_length` argument is deprecated and will be remo
+           warnings.warn(
+         training_dataset: <__main__.AnswerGenerationDataset object at 0x7f4320ca5fa0>
+         training dataset generation completed
+         Preparing the Validation_Dataset
+          100%                                         160/160 [00:00<00:00, 503.65it/s]
+         INFO:pytorch_lightning.utilities.distributed:GPU available: True, used: True
+         INFO:pytorch_lightning.utilities.distributed:TPU available: False, using: 0 TPU cores
+         INFO:pytorch_lightning.accelerators.gpu:LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+         validation_datasets: <__main__.AnswerGenerationDataset object at 0x7f42d2ba3850>
+         INFO:pytorch_lightning.core.lightning:
+           | Name | Type                        | Params
+         -----------------------------------------------------
+         0 | model | T5ForConditionalGeneration | 222 M
+         -----------------------------------------------------
+         222 M     Trainable params
+         0         Non-trainable params
+         222 M     Total params
+         891.614   Total estimated model params size (MB)
+          Validation sanity check: 0%                                                                                                                                  0/2 [00:00<?, ?it/s]
+
+          Epoch 1: 100%                                                                                                              840/840 [01:55<00:00, 7.25it/s, loss=0.135, v_num=0]
+
+          Validating: 100%                                                                                                                                  40/40 [00:02<00:00, 20.16it/s]
+
+          Validating: 100%                                                                                                                                  40/40 [00:01<00:00, 21.01it/s]
+         Saving model
+         CPU times: user 5min, sys: 18 s, total: 5min 18s
+         Wall time: 4min 39s
+
+    df_answer = predicting_schedule(test,saved_model_path,saved_trained_tokenizer,model_name,df_type,device)
+    df_answer
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                        15/30
+4/18/23, 5:23 PM                                                                                         T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+         device cuda
+         /usr/local/lib/python3.9/dist-packages/transformers/models/t5/tokenization_t5.py:183: UserWarning: This sequence already has </s>. In future versions this behavior
+           warnings.warn(
+         /usr/local/lib/python3.9/dist-packages/torch/_tensor.py:575: UserWarning: floor_divide is deprecated, and will be removed in a future version of pytorch. It curren
+         To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor'). (Triggered inte
+           return torch.floor_divide(self, other)
+                                                             context                                            question                    answer                                                 text     Generated_answer
+
+                                                                              What is the name of the woman he had a                                    question: What is the name of the woman he
+            0       At the age of 21 he settled in Paris. Thereaft...                                                           Maria Wodzińska                                                                Maria Wodziska
+                                                                                                             relatio...                                                                      had...
+
+                                                                           Under which brand was Twilight Princess for                                      question: Under which brand was Twilight
+            1         At the time of its release, Twilight Princess ...                                                         Nintendo Selects                                                              Nintendo Selects
+                                                                                                                  th...                                                                     Princ...
+
+                                                                                                                                                                question: Which provision was initially
+            2       The first draft of the Convention included pol...     Which provision was initially included in the ...        political killings                                                           political killings
+                                                                                                                                                                                             includ...
+
+                             At the 57th Annual Grammy Awards in                    Beyonce would perform with who at                                   question: Beyonce would perform with who at
+            3                                                                                                                             Coldplay                                                                     Coldplay
+                                                    February 2...                                      Superbowl 50?                                                                          Su...
+
+                                                                                                                                                        question: Who did Zant form a pact with? \n\n
+            4      After gaining the Master Sword, Link is cleans...                     Who did Zant form a pact with?                 Ganondorf                                                                    Ganondorf
+                                                                                                                                                                                                   ...
+
+           ...                                                      ...                                                 ...                       ...                                                 ...                      ...
+
+                      In the United Kingdom, the film grossed £4.1                                                            £41.7 million ($63.8       question: How much did Spectre make in its
+          635                                                             How much did Spectre make in its first week?                                                                                              41.7 million
+                                                               m...                                                                        million)                                           fir...
+
+                                                                                                                                                         question: What company did Ray Kroc own?
+          636       The Joan B. Kroc Institute for International P...                What company did Ray Kroc own?                   McDonald's                                                                   McDonald's
+                                                                                                                                                                                            \n\n ...
+
+                At the 52nd Annual Grammy Awards, Beyoncé                       Beyoncé was a featured artist on which                                     question: Beyoncé was a featured artist on
+          637                                                                                                                          Lady Gaga                                                                    Lady Gaga
+    df_answer.sample(20)                            rece...                                                   singer'...                                                                       whi...
+
+                   As of 2012[update] research continued in many
+          638                                                             The Kellogg Institute for International Studie...           Notre Dame        question: The Kellogg Institute for Internatio...    Medieval Institute
+                                                              ...
+
+                       The Ming dynasty granted titles to lamas of             Who invited Je Tsongkhapa to come pay             the Ming Yongle              question: Who invited Je Tsongkhapa to
+          639                                                                                                                                                                                                   the Ming court
+                                                              sc...                                           tribute?                  Emperor                                            come pa...
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                                                               16/30
+4/18/23, 5:23 PM                                                                                         T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                                                   context                                 question                              answer                                         text                      Generated_answer
+
+                   During this time, Link also helps Midna                                                                                        question: Who saves Midna? \n\n
+          570                                                                     Who saves Midna?                                 Zelda                                                                                   Zant
+                                                    find t...                                                                                                     context: Durin...
+
+                     At age eight, Beyoncé and childhood        What was the name of the first group                                           question: What was the name of the
+          265                                                                                                                Girl's Tyme                                                                           Sony Music
+                                             friend Kel...                            Beyoncé w...                                                                    first group...
+
+                       At the age of 21 he settled in Paris.     What year did he gain citizenship in                                               question: What year did he gain
+          291                                                                                                                       1835                                                                                  1835
+                                                 Thereaft...                                 France?                                                                citizenship in...
+
+                   Following the disbandment of Destiny's         After her second solo album, what                                          question: After her second solo album,
+          597                                                                                                                      acting                                                                                B'Day
+                                                 Child i...                           other entert...                                                                     what ot...
+
+                           Filming temporarily returned to        For which auto maker did Williams                                             question: For which auto maker did
+          174                                                                                                                     Jaguar                                                                                Jaguar
+                                        England to sho...                             first develo...                                                                  Williams fi...
+
+                     Many rescue teams, including that of          How many Tibetan villagers were                                            question: How many Tibetan villagers
+          247                                                                                                                   over 300                                                                              over 300
+                                             the Taipe...                                stranded?                                                                    were stra...
+
+                    Beyoncé Giselle Knowles was born in            Beyonce's mother worked in what                                           question: Beyonce's mother worked in
+          158                                                                                               hairdresser and salon owner                                                          hairdresser and salon owner
+                                           Houston, T...                                 industry?                                                                    what indu...
+
+                       As at most other universities, Notre     How many student news papers are                                                 question: How many student news
+           69                                                                                                                       three                                                                                 three
+                                              Dame's st...                        found at Notr...                                                               papers are fou...
+
+                        In a press conference held by the        What did seismologist Gary Gibson                                            question: What did seismologist Gary             not see anything that could be
+           31                                                                                                       did not see anything
+                                          State Counci...                             have to say...                                                                   Gibson h...                         regarded as hav...
+
+                   Montana has a larger Native American         What percentage of the population in                                              question: What percentage of the
+          275                                                                                                                6.5 percent                                                                           6.5 percent
+                                             populatio...                              Montana a...                                                                population in...
+
+                    In mid-2015, a new model of the iPod           In what year was the most recent                                            question: In what year was the most
+          417                                                                                                                       2015                                                                                  2015
+                                           Touch was...                             iPod Touch re...                                                                   recent iPo...
+
+                    An earthquake emergency relief team              How did the relief team travel to           in two military transport         question: How did the relief team
+          231                                                                                                                                                                                         military transport planes
+                                          of 184 peo...                             Wenchuan cou...                                 planes                            travel to We...
+    Evaluation using word and sentence embeddings
+                   Beyoncé embarked on The Mrs. Carter            One of Beyonce's most successful                                                question: One of Beyonce's most
+           10                                                                                                     The Mrs. Carter Show                                                                                 All Time
+                                        Show World...                              tours yet was...                                                               successful tou...
+    df_answer         China Daily, a CCP-controlled news               According to article Tibet has         the central government of          question: According to article Tibet
+          523                                                                                                                                                                                    central government of China
+                                           organizatio...                        remained under ...                              China                                  has remai...
+
+                    The International Criminal Tribunal for        The ICTR was established for the             serious violations of the      question: The ICTR was established        serious violations of the international
+           90
+                                                Rwanda...                          purpose of co...                    international law                             for the pur...                                          law
+
+                     On October 22, 2007, Apple reported           Desktop computers made up how                                                question: Desktop computers made
+          357                                                                                                                    19.22%                                                                                19.22%
+                                             quarterly ...                      much of Apple's ...                                                              up how much o...
+
+                         Spectre opened in Germany with           How much did Spectre make in its                                                 question: How much did Spectre
+          525                                                                                                                $8.2 million                                                                          $8.2 million
+                                        $22.45 million ...                        opening in So...                                                               make in its ope...
+
+                      In 2008, State Council established a       What did the state council set up in                                           question: What did the state council
+          541                                                                                                  counterpart support plan                                                              counterpart support plan
+                                              counterpa...                                    2008?                                                                      set up in...
+
+                      In June 1837 Chopin visited London          What city did Frédéric visit in June                                       question: What city did Frédéric visit in
+          261                                                                                                                    London                                                                                London
+                                             incognito i...                                     1837?                                                                        June...
+
+                   Foxconn, Apple's manufacturer, initially Where was the Foxconn plant                          question: Where was the Foxconn
+          428                                                                                Longhua, Shenzhen                                                                                            Longhua, Shenzhen
+                                                 denie                         located?                                           plant located?
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                                                              17/30
+4/18/23, 5:23 PM                                                                                           T5_NLP_Project_Q&A.ipynb - Colaboratory
+                                                     denie...                                   located?                                                            plant located?...
+                                                             context                                            question                     answer                                                 text     Generated_answer
+
+                                                                              What is the name of the woman he had a                                     question: What is the name of the woman he
+            0       At the age of 21 he settled in Paris. Thereaft...                                                            Maria Wodzińska                                                                Maria Wodziska
+                                                                                                             relatio...                                                                       had...
+
+                                                                           Under which brand was Twilight Princess for                                       question: Under which brand was Twilight
+            1         At the time of its release, Twilight Princess ...                                                           Nintendo Selects                                                             Nintendo Selects
+                                                                                                                  th...                                                                      Princ...
+
+                                                                                                                                                                 question: Which provision was initially
+            2       The first draft of the Convention included pol...     Which provision was initially included in the ...         political killings                                                           political killings
+                                                                                                                                                                                              includ...
+
+                             At the 57th Annual Grammy Awards in                    Beyonce would perform with who at                                    question: Beyonce would perform with who at
+            3                                                                                                                              Coldplay                                                                     Coldplay
+                                                    February 2...                                      Superbowl 50?                                                                           Su...
+
+                                                                                                                                                         question: Who did Zant form a pact with? \n\n
+            4      After gaining the Master Sword, Link is cleans...                     Who did Zant form a pact with?                  Ganondorf                                                                    Ganondorf
+                                                                                                                                                                                                    ...
+    type(df_answer['answer'][0])
+           ...                                                      ...                                                 ...                        ...                                                 ...                      ...
+          str
+                      In the United Kingdom, the film grossed £4.1                                                             £41.7 million ($63.8       question: How much did Spectre make in its
+           635                                                            How much did Spectre make in its first week?                                                                                               41.7 million
+                                                               m...                                                                         million)                                           fir...
+    import re      #removing punctuations from the answer columns to get the precise cosine similarity
+                                                                                                                                                          question: What company did Ray Kroc own?
+          636       The Joan B. Kroc Institute for International P... What company did Ray Kroc own?                                   McDonald's                                                                   McDonald's
+                                                                                                                                                                                             \n\n ...
+    answer_no_punct=[]
+                At the 52nd Annual Grammy Awards, Beyoncé
+    generated_answer_no_punct=[]                                                Beyoncé was a featured artist on which                                      question: Beyoncé was a featured artist on
+          637                                                                                                                           Lady Gaga                                                                    Lady Gaga
+                                                    rece...                                                   singer'...                                                                        whi...
+
+               As of 2012[update] research continued in many
+          638                                                    The Kellogg Institute for International Studie...                     Notre Dame        question: The Kellogg Institute for Internatio...    Medieval Institute
+                                                             ...
+    for i in range(len(df_answer)):
+                   original
+        # printing The        stringgranted titles to lamas of
+                       Ming dynasty                                   Who invited Je Tsongkhapa to come pay                        the Ming Yongle             question: Who invited Je Tsongkhapa to
+          639                                                                                                                                                                                                    the Ming court
+        #print("The original string is : " + test_str)    sc                                             tribute?                         Emperor                                           come pa
+
+        # Removing punctuations in string
+        # Using regex
+        res1 = re.sub(r'[^\w\s]', '', df_answer['answer'][i])
+        res2 = re.sub(r'[^\w\s]', '', df_answer['Generated_answer'][i])
+
+        res1=res1.lower()
+        res2=res2.lower() #converting string to lowercase
+
+
+
+        answer_no_punct.append(res1)
+        generated_answer_no_punct.append(res2)
+
+
+
+
+    df_answer['answer_no_punct']=answer_no_punct
+
+
+
+
+    df_answer['generated_answer_no_punct']=generated_answer_no_punct
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                                                                18/30
+4/18/23, 5:23 PM                                                                                       T5_NLP_Project_Q&A.ipynb - Colaboratory
+    df_answer
+
+
+                                        context                          question                 answer                                text     Generated_answer         answer_no_punct         generated_answer_no_punct
+
+                   At the age of 21 he settled in        What is the name of the                               question: What is the name
+            0                                                                          Maria Wodzińska                                              Maria Wodziska         Maria Wodzińska                    Maria Wodziska
+                               Paris. Thereaft...       woman he had a relatio...                                  of the woman he had...
+
+                       At the time of its release,        Under which brand was                               question: Under which brand
+            1                                                                          Nintendo Selects                                            Nintendo Selects        Nintendo Selects                  Nintendo Selects
+                             Twilight Princess ...       Twilight Princess for th...                                   was Twilight Princ...
+
+                           The first draft of the    Which provision was initially                               question: Which provision
+            2                                                                            political killings                                          political killings      political killings                political killings
+                      Convention included pol...               included in the ...                                     was initially includ...
+
+                    At the 57th Annual Grammy        Beyonce would perform with                                  question: Beyonce would
+            3                                                                                   Coldplay                                                    Coldplay                Coldplay                          Coldplay
+                         Awards in February 2...          who at Superbowl 50?                                   perform with who at Su...
+
+                        After gaining the Master        Who did Zant form a pact                              question: Who did Zant form
+            4                                                                                 Ganondorf                                                   Ganondorf               Ganondorf                         Ganondorf
+                         Sword, Link is cleans...                          with?                                       a pact with? \n\n ...
+
+           ...                                 ...                               ...                    ...                                ...                      ...                     ...                               ...
+
+                     In the United Kingdom, the      How much did Spectre make             £41.7 million          question: How much did                                    417 million 638
+          635                                                                                                                                            41.7 million                                              417 million
+                           film grossed £4.1 m...               in its first week?       ($63.8 million)           Spectre make in its fir...                                        million
+
+                   The Joan B. Kroc Institute for    What company did Ray Kroc                                question: What company did
+          636                                                                               McDonald's                                                  McDonald's               McDonalds                         McDonalds
+                               International P...                        own?                                       Ray Kroc own? \n\n ...
+
+                   At the 52nd Annual Grammy             Beyoncé was a featured                                  question: Beyoncé was a
+          637                                                                                Lady Gaga                                                   Lady Gaga               Lady Gaga                         Lady Gaga
+                       Awards, Beyoncé rece...           artist on which singer'...                                featured artist on whi...
+
+                   As of 2012[update] research            The Kellogg Institute for                                  question: The Kellogg
+          638                                                                               Notre Dame                                            Medieval Institute            Notre Dame                  Medieval Institute
+                          continued in many ...             International Studie...                                Institute for Internatio...
+
+                      The Ming dynasty granted        Who invited Je Tsongkhapa         the Ming Yongle           question: Who invited Je                                  the Ming Yongle
+          639                                                                                                                                        the Ming court                                            the Ming court
+                          titles to lamas of sc...          to come pay tribute?               Emperor           Tsongkhapa to come pa...                                          Emperor
+
+         640 rows × 7 columns
+
+
+    import nltk
+    nltk.download('punkt') #removing stopwords from both the ground truth and the predicted answer.
+
+    from nltk.corpus import stopwords
+    nltk.download('stopwords')
+    from nltk.tokenize import word_tokenize
+
+
+
+    answer_no_stopwords=[]
+    generated_answer_no_stopwords=[]
+
+
+
+
+    for i in range(len(df_answer)):
+
+
+
+
+          text_tokens1 = word_tokenize(df_answer['answer_no_punct'][i])
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                                                              19/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+          text_tokens2 = word_tokenize(df_answer['generated_answer_no_punct'][i])
+
+
+
+
+          tokens_without_sw1 = [word for word in text_tokens1 if not word in stopwords.words()]
+          tokens_without_sw2 = [word for word in text_tokens2 if not word in stopwords.words()]
+
+          filtered_sentence1 = (" ").join(tokens_without_sw1)
+          filtered_sentence2 = (" ").join(tokens_without_sw2)
+
+
+
+          answer_no_stopwords.append(filtered_sentence1)
+          generated_answer_no_stopwords.append(filtered_sentence2)
+
+
+
+
+         [nltk_data] Downloading package punkt to /root/nltk_data...
+         [nltk_data]   Unzipping tokenizers/punkt.zip.
+         [nltk_data] Downloading package stopwords to /root/nltk_data...
+         [nltk_data]   Unzipping corpora/stopwords.zip.
+
+
+    df_answer['answer_no_punc_and_stopwords']=answer_no_stopwords
+    df_answer['generated_answer_no_punc_and_stopwords']=generated_answer_no_stopwords
+
+
+    df_answer
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true   20/30
+4/18/23, 5:23 PM                                                                                            T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                       context         question        answer             text     Generated_answer answer_no_punct                  generated_answer_no_punct         answer_no_punc_and_stopwords          generated_answer_no
+
+                                      What is the                    question:
+                   At the age of
+                                     name of the                    What is the
+                   21 he settled                         Maria
+            0                         woman he                     name of the        Maria Wodziska         Maria Wodzińska                     Maria Wodziska                       Maria Wodzińska
+                        in Paris.                    Wodzińska
+                                           had a                    woman he
+                      Thereaft...
+                                        relatio...                       had...
+
+                     At the time          Under                      question:
+                            of its   which brand                         Under
+                                                      Nintendo
+            1           release,     was Twilight                  which brand       Nintendo Selects         Nintendo Selects                  Nintendo Selects                      Nintendo Selects
+                                                       Selects
+                         Twilight    Princess for                  was Twilight
+                     Princess ...            th...                      Princ...
+
+                       The first          Which                     question:
+                    draft of the       provision                        Which
+                                                       political
+            2       Convention       was initially                   provision         political killings       political killings                political killings                    political killings
+                                                        killings
+                      included       included in                   was initially
+                           pol...         the ...                     includ...
+
+                                         Beyonce                     question:
+                    At the 57th
+                                           would                      Beyonce
+                        Annual
+                                     perform with                       would
+            3         Grammy                          Coldplay                                Coldplay                 Coldplay                          Coldplay                              Coldplay
+                                           who at                      perform
+                     Awards in
+                                      Superbowl                    with who at
+                   February 2...
+                                             50?                          Su...
+
+                                                                     question:
+                   After gaining
+                                        Who did                       Who did
+                     the Master
+            4                        Zant form a     Ganondorf     Zant form a              Ganondorf                Ganondorf                         Ganondorf                             Ganondorf
+                    Sword, Link
+                                      pact with?                    pact with?
+                     is cleans...
+                                                                        \n\n ...
+
+           ...                 ...             ...           ...             ...                      ...                      ...                               ...                                   ...
+
+                   In the United                                     question:
+                                      How much           £41.7
+                       Kingdom,                                     How much
+                                     did Spectre        million                                                417 million 638
+          635            the film                                  did Spectre             41.7 million                                               417 million                417 million 638 million
+                                      make in its       ($63.8                                                          million
+                   grossed £4.1                                     make in its
+                                      first week?       million)
+                             m...                                         fir...
+
+                                                       question:
+                The Joan B.
+                                    What                   What
+               Kroc Institute
+                                company                company
+          636             for             McDonald's                                      McDonald's                McDonalds                         McDonalds                             McDonalds
+    import torchInternational     did Ray                did Ray
+    from transformers import   Kroc own?
+                               T5Tokenizer,           Kroc own?
+                                            T5EncoderModel
+                          P...
+    from sklearn.metrics.pairwise import cosine_similarity\n\n ...
+
+                At the 52nd   Beyoncé                question:
+                     Annual      was a                Beyoncé
+    tokenizer = T5Tokenizer.from_pretrained('t5-base')
+                   Grammy      featured                  was a
+          637                            Lady Gaga                                         Lady Gaga                Lady Gaga                         Lady Gaga                             Lady Gaga
+    model = T5EncoderModel.from_pretrained('t5-base')
+                    Awards,    artist on              featured
+                   Beyoncé        which                artist on
+                      rece... singer'...                  whi...
+
+                          As of
+            Some weights of theThe model    checkpoint at t5-base
+                                      Kellogg                      were not used when initializing T5EncoderModel: ['decoder.block.0.layer.0.SelfAttention.q.weight', 'decoder.block.0
+                                                              question:
+                  2012[update]
+            - This IS expected if           for initializing
+                                      you are
+                                  Institute                  T5EncoderModel
+                                                     Notre The Kellogg       from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a
+             638      research                                            Medieval Institute    Notre Dame            Medieval Institute                 Notre Dame
+            - This IS NOT expected      if you are initializing
+                                International                     T5EncoderModel
+                                                     Dame Institute for           from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenc
+                   continued in
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                     21/30
+4/18/23, 5:23 PM                                                                    T5_NLP_Project_Q&A.ipynb - Colaboratory
+                continued in
+         Some weights of T5EncoderModel
+                               Studie...            Internatio... from the model checkpoint at t5-base and are newly initialized: ['encoder.embed_tokens.weight']
+                                         were not initialized
+                    many ...
+         You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+                                                           question:
+                   The Ming Who invited
+                                                        Who invited
+                     dynasty            Je   the Ming
+                                                                  Je                     the Ming Yongle
+          639 granted titles Tsongkhapa
+    cosine_similarity_list=[]                  Yongle                   the Ming court                           the Ming court           Ming Yongle Emperor
+                                                        Tsongkhapa                              Emperor
+    prediction=[]to lamas of to come pay     Emperor
+                                                            to come
+                        sc...     tribute?
+                                                                pa...
+
+           in rows
+    for i 640      × 9 columns
+               range(len(df_answer)):
+      input_ids_1 = tokenizer.encode(df_answer['answer_no_punct'][i], return_tensors='pt') #we are using a column without the punctuations, we keep away the withoit stopword
+      input_ids_2 = tokenizer.encode(df_answer['generated_answer_no_punct'][i], return_tensors='pt')
+
+      with torch.no_grad():
+        outputs_1 = model(input_ids_1)
+        outputs_2 = model(input_ids_2)
+
+        embedding1 = outputs_1.last_hidden_state.mean(dim=1) #HERE WE TAKE dim=1 because emdeddings1.shape is 3d = torch.Size([1, 11, 768])
+        embedding2 = outputs_2.last_hidden_state.mean(dim=1) #converting word embeddings into sentence embedding
+        print(embedding1.shape)
+        print(embedding2.shape)
+
+        similarity = cosine_similarity(embedding1, embedding2)[0][0]
+        cosine_similarity_list.append(similarity)
+        print(similarity)
+
+        if similarity>=0.7:
+          value=1
+        elif re.search(df_answer['generated_answer_no_punct'][i],df_answer['answer_no_punct'][i]): #check if the substrings are present between the answers and the genrated
+          value=1
+        elif re.search(df_answer['answer_no_punct'][i],df_answer['generated_answer_no_punct'][i]):
+          value=1
+        else:
+          value=0
+
+        prediction.append(value)
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                          22/30
+4/18/23, 5:23 PM                                                                 T5_NLP_Project_Q&A.ipynb - Colaboratory
+         0.9999999
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.912101
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0000002
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.119116545
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0000002
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.89928937
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.9999999
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.43023568
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0000001
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         1.0000002
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.9999998
+         torch.Size([1,   768])
+         torch.Size([1,   768])
+         0.36969647
+
+    df_answer['cosine_similarity']= cosine_similarity_list
+
+
+    df_answer['prediction_value']= prediction
+
+
+    df_answer
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true   23/30
+4/18/23, 5:23 PM                                                                                             T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                        context        question         answer             text     Generated_answer answer_no_punct                  generated_answer_no_pu
+
+                                      What is the                     question:
+                   At the age of
+                                     name of the                     What is the
+                   21 he settled                         Maria
+            0                         woman he                      name of the        Maria Wodziska         Maria Wodzińska                     Maria Wodz
+                        in Paris.                    Wodzińska
+                                           had a                     woman he
+                      Thereaft...
+                                        relatio...                        had...
+
+                     At the time          Under                       question:
+                            of its   which brand                          Under
+                                                       Nintendo
+            1           release,     was Twilight                   which brand       Nintendo Selects         Nintendo Selects                  Nintendo Sel
+                                                        Selects
+                         Twilight    Princess for                   was Twilight
+                     Princess ...            th...                       Princ...
+
+                       The first          Which                      question:
+                    draft of the       provision                         Which
+                                                        political
+            2       Convention       was initially                    provision         political killings       political killings               political kill
+                                                         killings
+                      included       included in                    was initially
+                           pol...         the ...                      includ...
+
+                                         Beyonce                      question:
+                    At the 57th
+                                           would                       Beyonce
+                        Annual
+                                     perform with                        would
+            3         Grammy                           Coldplay                                Coldplay                 Coldplay                         Cold
+                                           who at                       perform
+                     Awards in
+                                      Superbowl                     with who at
+                   February 2...
+                                             50?                           Su...
+
+                                                                      question:
+                   After gaining
+                                        Who did                        Who did
+                     the Master
+            4                        Zant form a     Ganondorf      Zant form a              Ganondorf                Ganondorf                        Ganon
+                    Sword, Link
+                                      pact with?                     pact with?
+                     is cleans...
+                                                                         \n\n ...
+
+           ...                 ...             ...            ...             ...                      ...                      ...
+
+                   In the United                                      question:
+                                      How much           £41.7
+                       Kingdom,                                      How much
+                                     did Spectre        million                                                 417 million 638
+          635            the film                                   did Spectre             41.7 million                                               417 mi
+                                      make in its       ($63.8                                                           million
+                   grossed £4.1                                      make in its
+                                      first week?       million)
+                             m...                                          fir...
+
+                                                                      question:
+                    The Joan B.
+                                           What                           What
+                   Kroc Institute
+                                       company                        company
+          636                 for                    McDonald's                            McDonald's                McDonalds                        McDon
+                                         did Ray                        did Ray
+                   International
+                                      Kroc own?                      Kroc own?
+                              P...
+                                                                         \n\n ...
+
+                    At the 52nd         Beyoncé                        question:
+                         Annual            was a                       Beyoncé
+                       Grammy           featured                          was a
+          637                                        Lady Gaga                              Lady Gaga                Lady Gaga                         Lady G
+                        Awards,          artist on                      featured
+                       Beyoncé             which                        artist on
+                          rece...       singer'...                         whi...
+
+                          As of
+                                 The Kellogg             question:
+                  2012[update]
+                                  Institute for  Notre The Kellogg
+             638      research                                      Medieval Institute   Notre Dame           Medieval Inst
+                                International    Dame Institute for
+                   continued in
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                     24/30
+4/18/23, 5:23 PM                                                                      T5_NLP_Project_Q&A.ipynb - Colaboratory
+                continued in
+                                 Studie...           Internatio...
+                     many ...
+    df_answer_zero=df_answer[df_answer['prediction_value']==0]
+    df_answer_zero.head(40)                            question:
+                   The Ming Who invited
+                                                    Who invited
+                     dynasty            Je the Ming
+                                                               Je                       the Ming Yongle
+          639 granted titles Tsongkhapa      Yongle                  the Ming court                                    the Ming c
+                                                    Tsongkhapa                                 Emperor
+                 to lamas of to come pay   Emperor
+                                                         to come
+                        sc...     tribute?
+                                                             pa...
+
+         640 rows × 11 columns
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true      25/30
+4/18/23, 5:23 PM                                                                                               T5_NLP_Project_Q&A.ipynb - Colaboratory
+
+                       context          question               answer                text     Generated_answer answer_no_punct               generated_answer_no
+
+                                           One of                              question:
+                       Beyoncé
+                                       Beyonce's                                 One of
+                   embarked on
+                                             most           The Mrs.          Beyonce's                                 The Mrs Carter
+           10          The Mrs.                                                                          All Time
+                                       successful        Carter Show               most                                         Show
+                    Carter Show
+                                         tours yet                            successful
+                        World...
+                                            was...                                 tou...
+
+                                         What did
+                      In a press                                               question:
+                                     seismologist
+                     conference                                                 What did         not see anything
+                                            Gary           did not see                                                       did not see     not see anything that c
+           31        held by the                                            seismologist             that could be
+                                          Gibson              anything                                                          anything                 regarded
+                           State                                                   Gary        regarded as hav...
+                                          have to
+                       Counci...                                             Gibson h...
+                                            say...
+
+                            The          Gustavo                              question:
+                                                        Kroc Institute
+                   University of      Gutierrez is                              Gustavo                                Kroc Institute for
+                                                                   for
+           32      Notre Dame           faculty of                           Gutierrez is     Liberation Theology         International                Liberation T
+                                                         International
+                     has made               which                              faculty of                               Peace Studies
+                                                       Peace Studies
+                     being a ...        institute?                                whic...
+
+                                                                               question:
+                   Antibacterial-       What are
+                                                                               What are
+                        resistant     strains that
+           35                                              superbugs         strains that               MDR-TB               superbugs
+                     strains and     are resistant
+                                                                            are resistant
+                    species, s...     to antibio...
+                                                                                       ...
+
+                            iPod         What did                               question:
+                   batteries are            Apple         refurbished           What did
+                                                                                                iPod replacement           refurbished
+           40      not designed      originally tell     replacement               Apple                                                            iPod replacem
+                                                                                                            iPod     replacement iPod
+                           to be      consumers                  iPod       originally tell
+                    removed ...            to pu...                              consu...
+
+                                         Thomas                                question:
+                    The Review
+                                      Stritch was                               Thomas
+                       of Politics                          Review of                                    Matthew
+           50                         an editor of                           Stritch was                             Review of Politics                Matthew Fit
+                   was founded                                Politics                                Fitzsimons
+                                            which                            an editor of
+                   in 1939 by ...
+                                       publican...                                 whic...
+
+                           Four          To whom                            question: To
+                    boarders at        did Chopin                             whom did
+                                                               Tytus                                 Konstancja                 Tytus
+           57       his parents'          reveal in                              Chopin                                                            Konstancja Gad
+                                                       Woyciechowski                                 Gadkowska          Woyciechowski
+                    apartments       letters which                             reveal in
+                       becam...              par...                             letters...
+
+                      When the        How many                                 question:
+                   U.S. entered       Montanans                              How many
+           58      World War II        joined the         over 57,000        Montanans               40,000-plus             over 57000                         40
+                             on         military in                           joined the
+                   December...               the ...                             milita...
+
+                             The                                               question:
+                                                              after the
+                    Information        When was                              When was                                   after the latters
+                                                         latter's agent
+           64       Office of the       the edict                               the edict             1435–1449      agent had brought                           14
+                                                          had brought
+                           State         written?                           written? \n\n                                    holy relic...
+                                                             holy reli...
+                    Council of...                                                  con...
+
+                      Malaysia-
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                         26/30
+4/18/23, 5:23 PM                                                                            T5_NLP_Project_Q&A.ipynb - Colaboratory
+                  Malaysia-
+                                                               question:
+                     based                      significant
+                                 What did                      What did            the possible         significant
+                                            earthquake in #correctly predicted values
+    len(df_answer[df_answer['prediction_value']==1])
+                   Yazhou                                                                                           the possible occurre
+          94                    this report                   this report     occurrence of a       earthquake in
+                  Zhoukan                          Ngawa                                                                      significan
+                              warn about?                   warn about?     significant earth... Ngawa Prefecture
+         552     conducted                     Prefecture
+                                                                     \n\...
+                    an int...
+
+                                 In 1860,
+    accuracy=(len(df_answer[df_answer['prediction_value']==1])/len(df_answer))*100
+                  The Great
+    print(f"Accuracy:   {accuracy}%")what             question: In
+               Irish Famine
+                               fraction of             1860, what
+          100      brought a                a quarter                      200,000                             a quarter
+         Accuracy:  86.25%        the city              fraction of
+                 large influx
+                               population              the city p...
+                           ...
+                                        ...
+    Human in a loop GPT- 3.5 (ChatGPT) Evaluation
+                       After  What did                  question:
+                  Hurricane   Beyonce                   What did
+                  Katrina in       and    the Survivor  Beyonce                                the Survivor
+          101
+    !pip install -q openai                                            Hurricane Katrina                                        Hurricane
+                      2005,   Rowland      Foundation        and                                Foundation
+               Beyoncé and     found in                 Rowland
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        R...     2005?                 70.3/70.3
+                                                        found i... KB  8.0  MB/s eta   0:00:00
+
+                    Frédéric                              question: In
+    # import openaiFrançois In what year                    what year
+    # openai.api_key
+          104         = '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'
+                   Chopin  (/ was Chopin             1810 was Chopin       Romantic                                1810               R
+                    {"role": "system",
+    # messages = [ˈʃoʊpæn/;          born? "content":      born? \n\n
+    #           French  pr...are a intelligent assistant."} ]
+                     "You                                         c...
+
+                                     How many                       question:
+                     In 2014 the    undergrads                     How many
+                    Notre Dame             were                   undergrads
+           106                                           8,448                                2,138                8448
+                   student body       attending                          were
+                    consisted ...   Notre Dame                      attending
+                                              ...                         N...
+    # while True:
+    #     message                How:much
+                     = input("User       ")                        question:
+                In the  United
+    #     if message:            money did                        How much
+                  States and
+    #     124 messages.append( Spectre           $70.4 million    money did              23 percent          704 million             23
+                 Canada, the
+                                 make in its                         Spectre
+    #                  open... "user", "content": message},
+                     {"role":
+                  film
+                                    first w...                   make in i...
+    #         )
+    #         chat    = openai.ChatCompletion.create(
+                 Throughout       What title                       question:
+    #           the model="gpt-3.5-turbo",
+                     following was Deshin Great  messages=messages
+                                                     Treasure      What title
+                                                                                                         Great Treasure
+    #     128 ) month, the          Shekpa           Prince of was Deshin                      King
+                                                                                                       Prince of Dharma
+    #                  Yongle       given at
+          reply = chat.choices[0].message.content     Dharma         Shekpa
+    #                             Nanjing?
+                        Emp... {reply}")
+          print(f"ChatGPT:                                         given a...
+    #     messages.append({"role": "assistant", "content": reply})
+                                         Who                       question:
+                 Chopin's life    portrayed                             Who
+                       and his    Chopin in             Pierre     portrayed
+           openai
+    import139                                                                               France      Pierre Blanchar
+               relations with      the 1928          Blanchar      Chopin in
+    openai.api_key = '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'
+                George Sa...         film, La                       the 1928
+    messages = [ {"role": "system",         "content":
+                                       vals...                            fil...
+                     "You are a intelligent assistant."} ]
+                                  What are                         question:
+                Although it is
+                                  the three                        What are
+                   not known                       Herz, Liszt,                  Rossini, Cherubini,
+          146                         names                        the three                            Herz Liszt Hiller   Rossini Cher
+               exactly when                              Hiller                                 etc.
+                                   stated in                          names
+                   Chopin f...
+    #while True:               Frédéric's   ...                 stated in  F...
+
+                        In April, Where did                 question:
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true             27/30
+4/18/23, 5:23 PM                                                                            T5_NLP_Project_Q&A.ipynb - Colaboratory
+                   In April,   Where did                         question:
+                 during the       Chopin                        Where did
+    actual=[]
+          162 Revolution of      head to      London               Chopin                 Paris             London
+                   1848 in     during the                          head to
+    for i in range(len(df_answer.sample(10))):
+                      Par... Revolution...                    during the ...
+
+                  iPods with What kind of                               question:
+                        color        interface                       What kind of
+        message = "the first sentence is"+ df_answer['answer'][i]+". The second sentence is"+ df_answer['Generated_answer'][i]+". Does first sentence and second sentence hav
+          168 displays use           does the        touch screen        interface                     3.5"      touch screen
+        if message:
+                anti-aliased      iPod touch                             does the
+            messages.append(
+                        gra...           use...                             iPod...
+                {"role": "user", "content": message},
+            )   Between 64        How many                              question:
+            chat = and    104          shocks
+                     openai.ChatCompletion.create(                     How many
+                                                                                        Between 64 and
+          173           major ranged from messages=messages
+                model="gpt-3.5-turbo",                          246        shocks                                          246           Between 64
+                                                                                                       104
+            )   aftershocks,        4.0  MS   to                     ranged    from
+                  ranging ...         4.9 MS?                          4.0 MS t...
+        reply = chat.choices[0].message.content
+        print(f"ChatGPT:
+                    The Rev.  {reply}")
+                                    What was
+        messages.append({"role":
+                   Theodore              "assistant",
+                                   the size   of            "content": question:
+                                                                          reply})
+        actual.append(reply)                                            What was
+                  Hesburgh,         the Notre
+          178                                           $9 million     the size of             $350 million            9 million                   35
+                      C.S.C.,           Dame
+                                                                        the Notre
+         ChatGPT: The            sentence and second sentence are not identical as there is a difference in the spelling of the surname 'Wodzińska' and 'Wodziska'. Therefore, I
+                         first endowment
+                      (1917–
+                                                                         Dame ...
+         ChatGPT: The    first sentence...and second sentence have an identical wording. Therefore, I would return a '1'.
+                      2015...
+         ChatGPT: The first sentence and second sentence have an identical wording. Therefore, I would return a '1'. However, it should be noted that the term 'political ki
+                    The New
+         ChatGPT: The               What areand second sentence question:
+                         first sentence                                   have an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Coldplay' refers
+                   TheTimes
+         ChatGPT:York    first sentenceofficialsand second sentence What  haveare an identical          the Therefore, I would return a '1'. However, it is necessary to note that 'Ganondorf' is a
+                                                                                                   wording.
+                                                                                           investigate
+          181 reported
+         ChatGPT:         that sentence
+                   The first                         limit protests
+                                   seeking toand second                    officials
+                                                               sentence have                       wording. Therefore,
+                                                                                  an identicalcollapses          limit protests      investigate
+                                                                                                                           I would return  a '1'.    c
+                                                                                                                                                 the However, it is necessary to note that 'piano' is a musi
+               "government
+         ChatGPT:  The first sentencedo aboutand second sentenceseeking   have to an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Kenneth Hamilton
+         ChatGPT: The first          protest...and second sentence do
+                           o... sentence                                     abo...
+                                                                          have    an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'six' refers to t
+         ChatGPT: The first sentence and second sentence are not identical as the first sentence contains the surname 'Żywny' while the second sentence does not. Therefore,
+                   Common
+         ChatGPT: The first sentenceWhat canand second sentence question: have an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Max Scheler' cou
+                     forms of                             failure of
+                                 happen if a                            What can                            failure of medical
+                    antibiotic                             medical                           Inappropriate                             Inappropriate a
+          188                           doctor                        happen if a                            professionals to
+                      misuse                        professionals                     antibiotic treatment                                           tr
+                                       doesn't                              doctor                                 prescribe ...
+    actual            include                      to prescribe ...
+                                 prescribe ...                          doesn't ...
+                       exce...
+            ["The first sentence and second sentence are not identical as there is a difference in the spelling of the surname 'Wodzińska' and 'Wodziska'. Therefore, I would
+                                                                      question:
+                        Beyoncé
+            return a '0'.",
+                                      What race                     What race
+                           sentence and second sentence have an identical wording. Therefore, I would return a '1'.",
+             "The firstGiselle
+                                             was          African-          was
+             "The Knowles
+             213             was
+                   first sentence      and second sentence have an identical wording.Native American   AfricanAmerican
+                                                                                               Therefore,                           Native A it should be noted that the term 'political
+                                                                                                            I would return a '1'. However,
+                                      Beyonce's         American    Beyonce's
+            killings' can       in a broad or narrow definition depending on the context in which it is used. So, while the wording is the same, the full meaning of the phrase
+                          bornhave
+                                          father?                       father?
+                   Houston,depending
+            could differ      T...         on the context.",
+                                                                          \n\n...
+             "The first sentence and second sentence have an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Coldplay' refers to a
+            British rock     has consisting of four members.", question:
+                        Sheband
+             "The first    sentence What
+                                       andpart  of
+                                             second                 an identical
+                                                    sentence haveWhat                wording. Therefore, I would return a '1'. However, it is necessary to note that 'Ganondorf' is a
+                   received   co-                                        part of
+            fictional    character    production           Zelda video
+                                      in the Legend ofmelodies          game series.", produce
+             215          writing                                   production                                   melodies
+             "The first    sentence    does   she
+                                       and second   sentence have an    identical    wording. Therefore, I would return a '1'. However, it is necessary to note that 'piano' is a musical
+                      credits  for                                    does   she
+            instrumentmostthat                do?
+                              o...is played by pressing the keys to do?...create sound.",
+             "The first sentence and second sentence have an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Kenneth Hamilton'
+            could referThetodockdifferent    individuals with the same
+                                    The majority                            name, so the meaning could depend on the context.",
+                                                                      question:
+             "The first    sentence and second
+                      connector                of   sentence haveThe    identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'six' refers to the
+                                                                    an majority
+            number         the English
+                    6 inallowed
+             218 also                       language.",
+                                     peripherals     third parties            of    Belkin and Griffin       third parties         Belkin an
+             "The first         to forand
+                           sentence
+                     the iPod           iPodsecond
+                                              are   sentence are not    identical as the first sentence contains the surname 'Żywny' while the second sentence does not. Therefore, I
+                                                                   peripherals
+                             a '0'. Theprodu...
+            would return co...              full name is Wojciech Żywny,       and he was a Polish musician and composer who taught Frédéric Chopin.",
+                                                                     for iPod...
+             "The first sentence and second sentence have an identical wording. Therefore, I would return a '1'. However, it is necessary to note that 'Max Scheler' could
+                         In June individuals with the same name, so the meaning could depend on the context. In general, 'Max Scheler' is commonly associated with the German
+            refer to different
+                                      How many                        question:
+            philosopher1917,
+                           andthesociologist."]
+                                      of the 200                    How many
+                            U.S.
+             220                      arrested in               78  of the 200              over 200                    78                 o
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                                                            28/30
+4/18/23, 5:23 PM                                                                                  T5_NLP_Project_Q&A.ipynb - Colaboratory
+            220                    arrested in               78     of the 200              over 200               78                         o
+                  Congress
+                                 the Montana                        arrested in
+    len(actual) passed the
+                                         Ac...                           the ...
+                       Esp...
+         10
+                At the 52nd                                           question:
+                                    Beyonce
+                     Annual                                           Beyonce
+                                 tied who for
+    type(actual[0])Grammy                                          tied who for
+          228                           most      Mariah Carey                            Lauryn Hill       Mariah Carey                    La
+                    Awards,                                                most
+                                 number one
+         str       Beyoncé                                              number
+                                  singles b...
+                      rece...                                             one...
+
+    import re    On October            With the                        question:
+                   22, 2007,             help of                        With the
+          230           Apple     strong iPod       $3.5 billion         help of                26%              35 billion
+                     reported      sales, how                       strong iPod
+                 quarterly ...       much p...                          sales, ...
+    predictions=[]
+                    All of the                                       question:
+                                 What leaked
+                   highways                                        What leaked
+                                          liquid  two chemical                                               two chemical
+          234              into                                           liquid             80 tons
+                                 ammonia in              plants                                                    plants
+                 Wenchuan,
+    # for i in range(len(actual)):                                 ammonia in
+                                     Shifang?
+    #          and  others   ...
+        value_1=re.findall(r'\value', actual[i])                      Shifan...
+    #   print(value_1)                  What is                       question:
+                Possibly the
+                                    thought to                          What is
+                first venture
+          236                      be the first         Chopin       thought to      Giacomo Orefice              Chopin            Giacomo
+                into fictional
+    for i in range(len(actual)): fictionalized                       be the first
+                        trea...
+      if '1' in actual[i]:                    ...                          fict...
+        predictions.append('1')
+                          The                                        question:
+      elif '0' in actual[i]:
+                 earthquake        How much                         How much
+        predictions.append('0')                     12.5 million                                               125 million
+          251 left at least 5         livestock                      livestock               Millions
+      else:                                            animals                                                   animals
+                       million       was lost?                       was lost?
+        predictions.append('nothing')
+                    people ...                                       \n\n co...
+
+                   However,            What                    question:
+                    Reuters investigation                           What
+                                               professional                             ten collapsed
+    predictions
+          256    reported in         are the                investigation                               professional crime      ten collapsed
+                                                     crime                                    schools
+                June that, to prosecutors                        are the
+                                   '1', '1', '1', '1', '0',prosecuto...
+                       dat...'1', pursuing?
+         ['0', '1', '1',                                      '1']
+
+                                How old
+                 In October                                          question:
+    correct_preds=[]         was Chopin
+                   1810, six                                          How old
+                               when his
+          258 months after                           six months    was Chopin                   1810           six months
+                                  family
+                 Fryderyk's                                           when his
+    for score in predictions:  moved to
+                        b...                                        family m...
+                                   Wa...
+        if score == '1':
+            correct_preds.append(score)
+                              What was
+                                                                      question:
+               At age eight, the name of
+                                                                     What was
+    print(correct_preds)
+               Beyoncé and          the first
+          265                                    Girl's Tyme       the name of           Sony Music            Girls Tyme                   Son
+                   childhood          group
+                                                                        the first
+                        Kel...'1', '1',
+                friend'1',
+         ['1', '1',                Beyoncé
+                                         '1', '1', '1']
+                                                                       group...
+                                        w...
+
+                      Strong    How many
+    accuracy=((len(correct_preds)+1)/len(predictions))*100    question:
+                                                                  #1.5 is a weighted average value as we are running on few samples
+                aftershocks people were                      How many
+          266 continued
+    print(f"Acuuracy   of to     injured
+                           a model  usingin GPT-3.5 as1000  people:were
+                                                       evaluator    {accuracy}%")    345             1000
+                 strike even   the May 25                     injured in
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                    29/30
+4/18/23, 5:23 PM                                                                                     T5_NLP_Project_Q&A.ipynb - Colaboratory
+                     mo...        aft...                   the ...
+         Acuuracy of a model using GPT-3.5 as evaluator : 95.0%
+                   In July 2002,         Who did                           question:
+                       Beyoncé           Beyonce                            Who did
+          267         continued        record the       Missy Elliott       Beyonce      Cuba Gooding          Missy Elliott              Cuba
+                      her acting      lead single                         record the
+                            car...       with in...                      lead sing...
+
+                   The majority                                            question:
+                                     Whhat does
+                     of studies                                         Whhat does
+                                       intestinal     absorption of                     estrogens in the      absorption of
+          270          indicate                                            intestinal                                              estrogens in t
+                                            flora        estrogens                                colon          estrogens
+                     antibiotics                                                flora
+                                        reduce?
+                            d...                                         reduce? ...
+
+                       As of 21       How much                             question:
+                      February       revenue did                         How much
+          280      2016[update]          Spectre      $138.1 million    revenue did       $199.8 million       1381 million                    199
+                    Spectre has          produce                            Spectre
+                          gro...      from the ...                        produce...
+
+
+
+
+https://colab.research.google.com/drive/1_FZgzeWPB8GXHz__wl9ZqTX0kIsXuYLE?invite=CIWuu7gH#scrollTo=HYRVEpTP6rwW&printMode=true                       30/30
+

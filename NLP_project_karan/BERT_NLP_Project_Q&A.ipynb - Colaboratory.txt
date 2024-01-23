@@ -1,0 +1,1625 @@
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+
+     !pip install transformers
+     !pip install datasets==1.0.2
+
+
+             Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+             Collecting transformers
+               Downloading transformers-4.27.4-py3-none-any.whl (6.8 MB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.8/6.8 MB 90.3 MB/s eta 0:00:00
+             Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.9/dist-packages (from transformers) (4.65.0)
+             Collecting huggingface-hub<1.0,>=0.11.0
+               Downloading huggingface_hub-0.13.4-py3-none-any.whl (200 kB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 200.1/200.1 kB 25.8 MB/s eta 0:00:00
+             Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.9/dist-packages (from transformers) (23.0)
+             Requirement already satisfied: pyyaml>=5.1 in /usr/local/lib/python3.9/dist-packages (from transformers) (6.0)
+             Requirement already satisfied: requests in /usr/local/lib/python3.9/dist-packages (from transformers) (2.27.1)
+             Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.9/dist-packages (from transformers) (1.22.4)
+             Collecting tokenizers!=0.11.3,<0.14,>=0.11.1
+               Downloading tokenizers-0.13.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (7.8 MB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.8/7.8 MB 106.8 MB/s eta 0:00:00
+             Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.9/dist-packages (from transformers) (2022.10.31)
+             Requirement already satisfied: filelock in /usr/local/lib/python3.9/dist-packages (from transformers) (3.11.0)
+             Requirement already satisfied: typing-extensions>=3.7.4.3 in /usr/local/lib/python3.9/dist-packages (from huggingface-hub<1.
+             Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.9/dist-packages (from requests->transform
+             Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests->transformers) (3.4)
+             Requirement already satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.9/dist-packages (from requests->transformers)
+             Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.9/dist-packages (from requests->transformers) (2
+             Installing collected packages: tokenizers, huggingface-hub, transformers
+             Successfully installed huggingface-hub-0.13.4 tokenizers-0.13.3 transformers-4.27.4
+             Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+             Collecting datasets==1.0.2
+               Downloading datasets-1.0.2-py3-none-any.whl (1.8 MB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 56.0 MB/s eta 0:00:00
+             Requirement already satisfied: pyarrow>=0.17.1 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (9.0.0)
+             Requirement already satisfied: filelock in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (3.11.0)
+             Requirement already satisfied: pandas in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (1.5.3)
+             Requirement already satisfied: tqdm>=4.27 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (4.65.0)
+             Requirement already satisfied: requests>=2.19.0 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (2.27.1)
+             Requirement already satisfied: numpy>=1.17 in /usr/local/lib/python3.9/dist-packages (from datasets==1.0.2) (1.22.4)
+             Collecting dill
+               Downloading dill-0.3.6-py3-none-any.whl (110 kB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 110.5/110.5 kB 16.1 MB/s eta 0:00:00
+             Collecting xxhash
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                              1/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+               Downloading xxhash-3.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (212 kB)
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 212.2/212.2 kB 15.5 MB/s eta 0:00:00
+             Requirement already satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datas
+             Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->d
+             Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets
+             Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.9/dist-packages (from requests>=2.19.0->datasets==1.0.
+             Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets==1.0.2) (2022.7
+             Requirement already satisfied: python-dateutil>=2.8.1 in /usr/local/lib/python3.9/dist-packages (from pandas->datasets==1.0.
+             Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.9/dist-packages (from python-dateutil>=2.8.1->pandas->data
+             Installing collected packages: xxhash, dill, datasets
+             Successfully installed datasets-1.0.2 dill-0.3.6 xxhash-3.2.0
+
+
+
+     from google.colab import drive
+     drive.mount('/content/drive')
+
+             Mounted at /content/drive
+
+
+     import os
+     if not os.path.exists('/content/drive/MyDrive/BERT-SQuAD'):
+       os.mkdir('/content/drive/MyDrive/BERT-SQuAD')
+
+
+     import requests
+     import json
+     import torch
+     import os
+     from tqdm import tqdm
+
+     from datasets import load_dataset
+     import pandas as pd
+     import numpy as np
+
+
+     # Download the SQuAD dataset
+     dataset = load_dataset('squad')
+     print(dataset)
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                              2/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+             Downloading:                                                      5.24k/? [00:00<00:00, 360kB/s]
+
+             Downloading:                                                      2.19k/? [00:00<00:00, 168kB/s]
+             Downloading and preparing dataset squad/plain_text (download: 33.51 MiB, generated: 85.75 MiB, post-processed
+             Downloading:                                                      30.3M/? [00:00<00:00, 82.9MB/s]
+
+             Downloading:                                                      4.85M/? [00:00<00:00, 75.5MB/s]
+
+
+     # Print the first example in the training set
+     print(dataset['train'][0])
+     print()
+          Dataset squad downloaded and prepared to /root/.cache/huggingface/datasets/squad/plain_text/1.0.0/1244d044b26
+          DatasetDict({'train': Dataset(features: {'id': Value(dtype='string', id=None), 'title': Value(dtype='string',
+
+     # Access the context and question of the first example
+     context = dataset['train'][0]['context']
+     question = dataset['train'][0]['question']
+
+     print('Context:', context)
+     print()
+     print('Question:', question)
+
+             {'answers': {'answer_start': [515], 'text': ['Saint Bernadette Soubirous']}, 'context': 'Architecturally, the school has a C
+
+             Context: Architecturally, the school has a Catholic character. Atop the Main Building's gold dome is a golden statue of the
+
+             Question: To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?
+
+
+
+     train_data = dataset['train']
+     train_data
+
+             Dataset(features: {'id': Value(dtype='string', id=None), 'title': Value(dtype='string', id=None), 'context':
+             Value(dtype='string', id=None), 'question': Value(dtype='string', id=None), 'answers': Sequence(feature={'text':
+             Value(dtype='string', id=None), 'answer_start': Value(dtype='int32', id=None)}, length=-1, id=None)}, num_rows: 87599)
+
+
+     len(train_data)
+
+             87599
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                              3/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     print(train_data[0])
+
+             {'answers': {'answer_start': [515], 'text': ['Saint Bernadette Soubirous']}, 'context': 'Architecturally, the school has a C
+
+
+
+     print(train_data[0]['context'])
+     print(train_data[0]['question'])
+     print(train_data[0]['answers']['text'][0])
+
+             Architecturally, the school has a Catholic character. Atop the Main Building's gold dome is a golden statue of the Virgin Ma
+             To whom did the Virgin Mary allegedly appear in 1858 in Lourdes France?
+             Saint Bernadette Soubirous
+
+
+
+     print(train_data[99]['context'])
+
+
+             One of the main driving forces in the growth of the University was its football team, the Notre Dame Fighting Irish. Knute R
+
+
+
+     %%time
+     context = []
+     question = []
+     answer = []
+
+     for i in range(len(train_data)):
+
+           context.append(train_data[i]['context'])
+           question.append(train_data[i]['question'])
+           answer.append(train_data[i]['answers']) #dictionary getting appended to the list
+
+             CPU times: user 13.7 s, sys: 186 ms, total: 13.9 s
+             Wall time: 13.8 s
+
+
+     print(len(context))
+     print(len(question))
+     print(len(answer))
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                              4/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+             87599
+             87599
+             87599
+
+
+     #valid data is the test data
+
+     train_size = 10000
+     test_size = 500
+     train_contexts, train_questions, train_answers = context[0:train_size], question[0:train_size], answer[0:train_size]
+     valid_contexts, valid_questions, valid_answers = context[train_size:train_size+test_size], question[train_size:train_size+test_siz
+
+
+     print(len(train_contexts))
+     print(len(train_questions))
+     print(len(train_answers))
+
+
+             10000
+             10000
+             10000
+
+
+     print(len(valid_contexts))
+     print(len(valid_questions))
+     print(len(valid_answers))
+
+             500
+             500
+             500
+
+
+     # print a random question and answer
+     print(f'There are {len(train_questions)} questions')
+     print(train_questions[-1000])
+     print(train_answers[-1000])
+
+             There are 10000 questions
+             How much was withdrawn from money markets during one week in September 2008?
+             {'answer_start': [266], 'text': ['$144.5 billion']}
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                           5/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     def add_end_idx(answers, contexts): #add end position of the answer
+       for answer, context in zip(answers, contexts):
+         gold_text = answer['text'][0]
+         start_idx = answer['answer_start'][0] #660
+         answer['answer_start'] = start_idx
+         end_idx = start_idx + len(gold_text)
+         # print(start_idx,gold_text,end_idx)
+
+           # sometimes squad answers are off by a character or two so we fix this
+           if context[start_idx:end_idx] == gold_text:
+             answer['answer_end'] = end_idx
+           elif context[start_idx-1:end_idx-1] == gold_text:
+             answer['answer_start'] = start_idx - 1
+             answer['answer_end'] = end_idx - 1     # When the gold label is off by one character
+           elif context[start_idx-2:end_idx-2] == gold_text:
+             answer['answer_start'] = start_idx - 2
+             answer['answer_end'] = end_idx - 2     # When the gold label is off by two characters
+
+
+
+
+     add_end_idx(train_answers, train_contexts)
+     add_end_idx(valid_answers, valid_contexts)
+
+
+     valid_answers[0]
+
+             {'answer_start': 520, 'text': ['six'], 'answer_end': 523}
+
+
+     # You can see that now we get the answer_end also
+     print(train_questions[-1000])
+     print(train_answers[-1000])
+
+             How much was withdrawn from money markets during one week in September 2008?
+             {'answer_start': 266, 'text': ['$144.5 billion'], 'answer_end': 280}
+
+
+     from transformers import BertTokenizerFast
+
+     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased') #tokenizing the features of traim data
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    6/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     # from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+
+     # tokenizer = AutoTokenizer.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
+
+
+
+     train_encodings = tokenizer(train_contexts, train_questions, truncation=True, padding=True, max_length = 512)
+     valid_encodings = tokenizer(valid_contexts, valid_questions, truncation=True, padding=True, max_length = 512)
+
+
+             Downloading (…)okenizer_config.json: 100%                                                         28.0/28.0 [00:00<00:00, 1.29kB/s]
+
+             Downloading (…)solve/main/vocab.txt: 100%                                                         232k/232k [00:00<00:00, 552kB/s]
+
+             Downloading (…)/main/tokenizer.json: 100%                                                        466k/466k [00:00<00:00, 21.3MB/s]
+
+             Downloading (…)lve/main/config.json: 100%                                                        570/570 [00:00<00:00, 38.8kB/s]
+
+
+
+     train_encodings.keys()
+
+             dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
+
+
+     no_of_encodings = len(train_encodings['input_ids'])
+     print(f'We have {no_of_encodings} context-question pairs')
+
+             We have 10000 context-question pairs
+
+
+     tokenizer.decode(train_encodings['input_ids'][0])
+
+             '[CLS] architecturally, the school has a catholic character. atop the main building\'s gold dome is a golden
+             statue of the virgin mary. immediately in front of the main building and facing it, is a copper statue of chr
+             ist with arms upraised with the legend " venite ad me omnes ". next to the main building is the basilica of t
+             he sacred heart. immediately behind the basilica is the grotto, a marian place of prayer and reflection. it i
+             s a replica of the grotto at lourdes, france where the virgin mary reputedly appeared to saint bernadette sou
+             birous in 1858. at the end of the main drive ( and in a direct line that connects through 3 statues and the g
+             old dome ), is a simple, modern stone statue of mary. [SEP] to whom did the virgin mary allegedly appear in 1
+             858 in lourdes france? [SEP] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [P
+             AD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PA
+
+
+     len(train_encodings['input_ids'][0])
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                           7/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+             512
+
+
+     #train_encodings['attention_mask'][0]
+
+
+     train_answers
+
+             [{'answer_start': 515,
+               'text': ['Saint Bernadette Soubirous'],
+               'answer_end': 541},
+              {'answer_start': 188,
+               'text': ['a copper statue of Christ'],
+               'answer_end': 213},
+              {'answer_start': 279, 'text': ['the Main Building'], 'answer_end': 296},
+              {'answer_start': 381,
+               'text': ['a Marian place of prayer and reflection'],
+               'answer_end': 420},
+              {'answer_start': 92,
+               'text': ['a golden statue of the Virgin Mary'],
+               'answer_end': 126},
+              {'answer_start': 248, 'text': ['September 1876'], 'answer_end': 262},
+              {'answer_start': 441, 'text': ['twice'], 'answer_end': 446},
+              {'answer_start': 598, 'text': ['The Observer'], 'answer_end': 610},
+              {'answer_start': 126, 'text': ['three'], 'answer_end': 131},
+              {'answer_start': 908, 'text': ['1987'], 'answer_end': 912},
+              {'answer_start': 119, 'text': ['Rome'], 'answer_end': 123},
+              {'answer_start': 145, 'text': ['Moreau Seminary'], 'answer_end': 160},
+              {'answer_start': 234, 'text': ['Old College'], 'answer_end': 245},
+              {'answer_start': 356,
+               'text': ['Retired priests and brothers'],
+               'answer_end': 384},
+              {'answer_start': 675,
+               'text': ['Buechner Prize for Preaching'],
+               'answer_end': 703},
+              {'answer_start': 487, 'text': ['eight'], 'answer_end': 492},
+              {'answer_start': 46, 'text': ['1920'], 'answer_end': 50},
+              {'answer_start': 126, 'text': ['the College of Science'], 'answer_end': 148},
+              {'answer_start': 271, 'text': ['five'], 'answer_end': 275},
+              {'answer_start': 155, 'text': ['the 1870s'], 'answer_end': 164},
+              {'answer_start': 496,
+               'text': ['Learning Resource Center'],
+               'answer_end': 520},
+              {'answer_start': 68, 'text': ['five'], 'answer_end': 72},
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    8/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+              {'answer_start': 155,
+               'text': ['The First Year of Studies program'],
+               'answer_end': 188},
+              {'answer_start': 647,
+               'text': ['U.S. News & World Report'],
+               'answer_end': 671},
+              {'answer_start': 358, 'text': ['1924'], 'answer_end': 362},
+              {'answer_start': 624, 'text': ['Master of Divinity'], 'answer_end': 642},
+              {'answer_start': 1163,
+               'text': ['Alliance for Catholic Education'],
+               'answer_end': 1194},
+              {'answer_start': 92, 'text': ['1854'], 'answer_end': 96},
+              {'answer_start': 757,
+               'text': ['Department of Pre-Professional Studies'],
+               'answer_end': 795},
+              {'answer_start': 4,
+               'text': ['Joan B. Kroc Institute for International Peace Studies'],
+               'answer_end': 58},
+              {'answer_start': 466,
+               'text': ['President Emeritus of the University of Notre Dame'],
+               'answer_end': 516},
+              {'answer_start': 303, 'text': ['1986'], 'answer_end': 307},
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    9/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     def add_token_positions(encodings, answers): #adding the token index position
+       start_positions = [] # Here, we are talking abot word starting position
+       end_positions = []
+       for i in range(len(answers)):
+         start_positions.append(encodings.char_to_token(i, answers[i]['answer_start'])) #9. #train answer is a dictionary
+         end_positions.append(encodings.char_to_token(i, answers[i]['answer_end'] - 1)) #13
+       # end_positions.append(13) #13 word index, this will basically tell us how long is the answer text.
+
+
+
+           # if start position is None, the answer passage has been truncated
+           if start_positions[-1] is None:
+             start_positions[-1] = tokenizer.model_max_length
+           if end_positions[-1] is None:
+             end_positions[-1] = tokenizer.model_max_length
+
+        encodings.update({'start_positions': start_positions, 'end_positions': end_positions}) #updating the train_encodings dictionary
+
+     add_token_positions(train_encodings, train_answers)
+     add_token_positions(valid_encodings, valid_answers)
+
+
+     train_encodings.keys()
+
+             dict_keys(['input_ids', 'token_type_ids', 'attention_mask', 'start_positions', 'end_positions'])
+
+
+     train_encodings['start_positions'][:10]
+
+             [114, 40, 65, 85, 20, 51, 85, 111, 27, 166]
+
+
+     train_encodings['end_positions'][:10]
+
+             [121, 44, 67, 91, 26, 52, 85, 112, 27, 166]
+
+
+     type(train_encodings['input_ids']) #values are the lists of list for each data point, check that in next cell
+
+             list
+
+
+     #train_encodings['input_ids'][0:2]
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                            10/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+      Data preparation and Data Loader
+
+
+     class SQuAD_Dataset(torch.utils.data.Dataset): #similar to answergenerationdata() class in T5
+       def __init__(self, encodings):
+         self.encodings = encodings
+       def __getitem__(self, idx):
+         return {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+       def __len__(self):
+         return len(self.encodings.input_ids)
+
+
+     train_dataset = SQuAD_Dataset(train_encodings)
+     valid_dataset = SQuAD_Dataset(valid_encodings)
+
+
+     train_dataset
+
+             <__main__.SQuAD_Dataset at 0x7f6d79df51f0>
+
+
+     from torch.utils.data import DataLoader
+
+     # Define the dataloaders
+     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+     valid_loader = DataLoader(valid_dataset, batch_size=16)
+
+
+      Fine Tuning
+
+
+     from transformers import BertForQuestionAnswering
+
+     model = BertForQuestionAnswering.from_pretrained("bert-base-uncased")
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    11/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+             Downloading pytorch_model.bin: 100%                                                           440M/440M [00:01<00:00, 421MB/s]
+          Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertForQuestionAnsw
+          - transformers
+     # from                   if AutoTokenizer,
+                          import
+             This IS expected                   AutoModelForQuestionAnswering
+                                 you are initializing BertForQuestionAnswering from the checkpoint of a model trained on
+          - This IS NOT expected if you are initializing BertForQuestionAnswering from the checkpoint of a model that y
+          Some weights of BertForQuestionAnswering were not initialized from the model checkpoint at bert-base-uncased
+          You= should
+     # model          probably TRAIN this model on a down-stream task to be able to use it for predictions and inference
+                AutoModelForQuestionAnswering.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
+
+
+     # Check on the available device - use GPU
+     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+     print(f'Working on {device}')
+
+             Working on cuda
+
+
+      Training batch by batch
+
+
+     %%time
+     from transformers import AdamW
+
+     N_EPOCHS = 5
+     optim = AdamW(model.parameters(), lr=5e-5)
+
+     model.to(device)
+     model.train()
+
+     for epoch in range(N_EPOCHS):
+       loop = tqdm(train_loader, leave=True)
+       for batch in loop:
+         optim.zero_grad()
+         input_ids = batch['input_ids'].to(device)
+         attention_mask = batch['attention_mask'].to(device)
+         start_positions = batch['start_positions'].to(device)
+         end_positions = batch['end_positions'].to(device)
+         outputs = model(input_ids, attention_mask=attention_mask, start_positions=start_positions, end_positions=end_positions)
+         loss = outputs[0]
+         loss.backward()
+         optim.step()
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                      12/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+           loop.set_description(f'Epoch {epoch+1}')
+           loop.set_postfix(loss=loss.item()) #it will take 250 steps because 250*16=4000 train data points
+
+             /usr/local/lib/python3.9/dist-packages/transformers/optimization.py:391: FutureWarning: This implementation of AdamW is depr
+               warnings.warn(
+             Epoch 1: 100%|██████████| 625/625 [03:52<00:00, 2.69it/s, loss=1.98]
+             Epoch 2: 100%|██████████| 625/625 [03:48<00:00, 2.73it/s, loss=0.555]
+             Epoch 3: 100%|██████████| 625/625 [03:48<00:00, 2.73it/s, loss=1.21]
+             Epoch 4: 100%|██████████| 625/625 [03:48<00:00, 2.73it/s, loss=0.375]
+             Epoch 5: 100%|██████████| 625/625 [03:48<00:00, 2.73it/s, loss=0.242]CPU times: user 19min 13s, sys: 5.45 s, total: 19min 1
+             Wall time: 19min 13s
+
+
+
+
+      Respectively, load the saved model
+
+
+     model_path = '/content/drive/MyDrive/BERT-SQuAD'
+     model.save_pretrained(model_path)
+     tokenizer.save_pretrained(model_path)
+
+             ('/content/drive/MyDrive/BERT-SQuAD/tokenizer_config.json',
+              '/content/drive/MyDrive/BERT-SQuAD/special_tokens_map.json',
+              '/content/drive/MyDrive/BERT-SQuAD/vocab.txt',
+              '/content/drive/MyDrive/BERT-SQuAD/added_tokens.json',
+              '/content/drive/MyDrive/BERT-SQuAD/tokenizer.json')
+
+
+     #from transformers import BertForQuestionAnswering, BertTokenizerFast
+
+     #model_path = '/content/drive/MyDrive/BERT-SQuAD'
+     #model = BertForQuestionAnswering.from_pretrained(model_path)
+     #tokenizer = BertTokenizerFast.from_pretrained(model_path)
+
+     #device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+     #print(f'Working on {device}')
+
+     #model = model.to(device)
+
+
+     def get_prediction(question,context):
+         model.eval() #during evaluation the output[0] is answer_start
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                             13/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+           inputs = tokenizer.encode_plus(question, context, return_tensors='pt')
+           inputs.to(device)
+
+           outputs = model(**inputs)
+           print(len(outputs[0][0]))
+           print(outputs[0])
+           print(outputs[1])
+           answer_start = torch.argmax(outputs[0]) # get the most likely beginning of answer with the argmax of the score
+           answer_end = torch.argmax(outputs[1]) + 1 #we do this as we slice in next line
+
+           answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0][answer_start:answer_end]))
+
+           return answer
+
+
+     valid_contexts[50]
+
+             'In 2009, the Internet Archive migrated its customized storage architecture to Sun Open Storage, and hosts a
+             new data center in a Sun Modular Datacenter on Sun Microsystems' California campus.'
+
+
+     valid_questions[50]
+
+             'Which platform did Internet Archive adopt in 2009?'
+
+
+     valid_answers[50]
+
+             {'answer_start': 78, 'text': ['Sun Open Storage'], 'answer_end': 94}
+
+
+     answer = get_prediction(valid_questions[50], valid_contexts[50])
+     answer
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                             14/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+          49
+          tensor([[-8.4689, -8.1867, -7.2339, -9.1200, -7.9563, -9.6098, -9.6103, -8.9505,
+                    -8.3590, -9.5754, -9.1829, -8.2903, -7.5591, -8.4269, -7.8546, -8.2313,
+                    -9.6475, -7.9955, -8.3689, -6.7731, -7.0266, -8.9066, -9.1226, 2.6842,
+                    -4.6159, -2.5551, -8.2625, -8.9038, -9.0109, -8.5030, -8.9333, -6.6895,
+                    -8.4359, -8.0553, -7.8205, -0.1116, -7.0435, -2.8897, -8.6636, -6.1469,
+                    -8.2592, -3.3752, -7.7814, -8.1788, -8.8778, -6.2800, -8.0309, -8.1261,
+                    -9.2097]], device='cuda:0', grad_fn=<CloneBackward0>)
+          tensor([[ -9.4436, -7.3927, -5.9252, -9.9794, -10.2777, -8.1303, -9.1569,
+                     -9.7878, -9.3642, -9.0423, -9.7059, -10.0432, -9.1880, -5.3588,
+                    -10.4238, -10.3221, -8.4642, -9.2434, -10.1285, -8.9913, -8.4173,
+     predicted_answer  = []
+                     -8.3225,  -9.5439, -2.2443, -2.9049,     7.0336, -4.1461, -9.9016,
+                     -9.7148, -10.0108, -9.5350, -10.3968, -7.7274, -10.3189, -10.3280,
+     for i in range(len(valid_questions)):
+                     -3.3882, -6.9894, -7.2324, -9.2267, -2.4395, -9.9601, -8.9066,
+                    -10.2299, -3.8176, -9.3907, -7.6205, -7.0866, -2.2223, -9.6589]],
+          answer =device='cuda:0', grad_fn=<CloneBackward0>)
+                    get_prediction(valid_questions[i], valid_contexts[i])
+          ' sun open storage'
+          predicted_answer.append(answer)
+
+             Streaming output truncated to the last 5000 lines.
+                       -3.2752, -10.1493, -10.1237, -10.3027, -8.2759, -4.6918, -8.3968,
+                       -9.8141, -8.7996, -8.0203, -9.8982, -9.9799, -9.7000, -8.2906,
+                       -8.8343, -9.8923, -7.5105, -10.1536, -9.4758, -7.3538, -7.5709,
+                       -9.8017, -10.2287, -9.9765, -8.8676, -10.3047, -9.6941, -5.4529,
+                       -3.8887, -9.6217, -9.5557, -9.2553, -10.0703, -10.1264, -9.1329,
+                       -8.1555, -7.7882, -9.5312, -9.0373, -6.3848, -8.3619, -9.5364,
+                       -9.9021, -8.7321, -6.6137, -5.8375, -10.4401, -9.7489, -9.8641,
+                       -9.1958, -10.4755, -10.2954, -9.9238, -9.2564, -9.7121, -10.0136,
+                       -9.7067, -9.8764, -9.2260, -6.3361, -9.6069, -9.1643, -10.0782,
+                      -10.3090, -10.1210, -10.0586, -9.3914, -5.9436, -3.3955, -9.7296]],
+                    device='cuda:0', grad_fn=<CloneBackward0>)
+             148
+             tensor([[-9.0756, -8.5790, -9.7548, -9.6027, -9.3842, -9.7131, -9.2793, -9.2023,
+                      -7.0852, -6.8641, -9.3932, -9.1304, -7.0726, -3.7507, -9.1749, -7.4165,
+                      -9.3845, -9.1929, -7.6984, -9.2424, -6.7016, -8.3138, -9.4188, -9.0783,
+                      -5.9736, -9.7424, -7.0679, -9.5071, -9.2681, -9.1275, -9.4087, -8.4352,
+                      -8.6420, -9.4471, -9.6955, -9.5181, -9.5845, -9.3957, -9.4477, -8.5745,
+                      -4.8981, -4.0496, -9.1521, -9.5632, -6.7190, -8.8318, -5.7386, -9.1710,
+                      -6.4254, -8.8713, -8.6422, -8.6085, -6.0506, -8.4246, -8.3562, -7.7980,
+                      -6.6988, -7.3187, -9.5047, -8.8397, -9.1809, -8.9204, -9.2396, -6.1655,
+                      -9.2390, -8.8206, -6.0516, -8.9062, -8.7556, -8.8059, -9.6316, -7.3787,
+                      -8.7910, -8.7241, -9.2020, -9.4290, -8.7212, -6.7330, -7.8492, -7.5333,
+                      -9.3555, -8.7117, -7.6788, -9.2303, -9.1355, -9.5853, -9.6668, -8.5297,
+                      -9.3166, -9.1083, -9.1354, -9.0266, -5.8553, -9.4775, -9.5455, -9.1083,
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    15/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+                      -6.0931, -8.8820, -9.8346, -9.7754, -8.9622, -9.3812, -9.4086, -8.8961,
+                      -7.0629, -8.8250, -9.6879, -9.2092, -9.2561, -9.4109, -8.5071, -8.5138,
+                      -8.3333, -6.7805, -9.2459, -8.5575, -9.1150, -8.9146, -9.8872, -9.1416,
+                      -6.0901, -9.5565, -9.0026, -8.1143, -8.2389, -9.0877, -9.3151, -8.9634,
+                      -8.0552, -8.1949, -8.5906, -8.9199, -9.4194, -8.1858, -8.4374, -8.9210,
+                      -9.7610, -9.5859, -9.7840, -9.8213, -9.4019, -8.7017, -9.2035, -8.5541,
+                      -8.0148, -9.1745, -7.8354, -9.1109]], device='cuda:0',
+                    grad_fn=<CloneBackward0>)
+             tensor([[ -9.7638, -8.1122, -9.5002, -9.2148, -9.6277, -9.3240, -9.8726,
+                       -9.8924, -8.2144, -6.3704, -9.6650, -9.8667, -9.8621, -8.2235,
+                       -6.7500, -8.1568, -9.5445, -8.6095, -3.7303, -9.4331, -8.2473,
+                       -5.1848, -8.9516, -9.5367, -7.4389, -9.0569, -9.7192, -9.7613,
+                       -7.7247, -5.4616, -9.6401, -9.8606, -9.8895, -9.8611, -9.7448,
+                       -9.8528, -9.8882, -9.8579, -8.2998, -9.8515, -9.7227, -8.2406,
+                       -9.5111, -7.1906, -7.3389, -9.4040, -7.0662, -9.5868, -5.9261,
+                       -4.7651, -10.1669, -10.0201, -8.8414, -8.7317, -5.9369, -3.0893,
+                      -10.5162, -9.1483, -9.7041, -9.8283, -10.0674, -9.4880, -9.9550,
+                       -7.0127, -10.0339, -9.9465, -9.1079, -8.1008, -9.8303, -6.2126,
+                       -9.6145, -10.2796, -7.5700, -5.4351, -9.3285, -9.8265, -9.8893,
+                       -5.3509, -3.3255, -10.0888, -10.0765, -10.3951, -9.6782, -8.3038,
+                       -9.5851, -9.8377, -9.4912, -8.2259, -9.8984, -9.9979, -9.6633,
+                       -8.6201, -8.9771, -9.8709, -7.7587, -10.1906, -10.0497, -8.1497,
+                       -8.3172, -9.8240, -10.1921, -9.9681, -8.9686, -10.3017, -10.2071,
+                       -7.3633, -5.6023, -9.6207, -9.5546, -9.2055, -9.9962, -10.0475,
+                       -9.3889, -9.0643, -8.3603, -9.5979, -9.0268, -6.7202, -8.6369,
+                       -9.6822, -10.2400, -8.9829, -7.1957, -6.5788, -10.4001, -9.7302,
+                       -9.8097, -9.3889, -10.4326, -10.2259, -9.9752, -9.2927, -9.7641,
+                      -10.0456, -9.9493, -9.8518, -9.1552, -5.9632, -9.5754, -9.1373,
+                      -10.0507, -10.3117, -9.9947, -10.0953, -9.8879, -7.9891, -3.0815,
+                       -9.8205]], device='cuda:0', grad_fn=<CloneBackward0>)
+             48
+             tensor([[-6.4910, -6.9951, -8.1285, -8.7954, -8.8592, -7.4640, -8.2962, -9.1412,
+                       6 6149   8 4264   7 9965   8 7625   5 8817   1 7994   3 9908   8 9600
+
+     len(predicted_answer)
+
+             500
+
+
+     original_answer = []
+
+     for i in range(len(valid_answers)):
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    16/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+             original_answers = valid_answers[i]['text'][0]
+             original_answer.append(original_answers)
+
+
+     import pandas as pd
+     # Create a dictionary from the lists
+     data = {'Question': valid_questions, 'Context': valid_contexts, 'Original_Answer': original_answer, 'Predicted_Answer': predicted_
+
+     # Convert the dictionary to a pandas DataFrame
+     df = pd.DataFrame(data)
+
+
+     df
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                           17/31
+4/18/23, 5:25 PM                                                                   BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+                                           Question                           Context                  Original_Answer                  Predicted_Answer
+
+                            When Konya Technical          In Turkey and the Ottoman
+                   0                                                                                                    six
+                       University opens, how man...             Empire, the oldest t...
+
+                           What two cities in Turkey      In Turkey and the Ottoman
+                   1                                                                                 Ankara and Trabzon                  ankara and trabzon
+                              acquired institutes ...           Empire, the oldest t...
+     df.sample(10)                What year did UK
+                                                           Polytechnics were tertiary
+                   2              polytechnics start                                                              1970                              1970
+                                                               education teaching ...
+                                        functionin...
+                                           Question                          Context                   Original_Answer                  Predicted_Answer
+
+                        What organization
+                         In what            validates
+                                 jurisdiction was the      Polytechnics  were tertiary
+                                                            Magistrate Judge   Howard        the UK Council  forDistrict
+                                                                                                      Northern  National of          uk district
+                                                                                                                               northern councilofforcalifornia,
+                                                                                                                                                     national
+               3
+               64             degrees
+                                 Netbulareceived   f...
+                                           v. Chordi...        education
+                                                              Lloyd in theteaching
+                                                                           Northern......              Academic
+                                                                                              California,        Awards
+                                                                                                          San Jose  Divi...         academicsan awards    cnaa
+                                                                                                                                                  jose divi...
+
+                         What
+                       What    two-word
+                            language     termroots
+                                     do the    doesof      Polytechnics were
+                                                           Commensalism        tertiary a
+                                                                            describes                                             polytechnics were tertiary
+               4
+              204                                                                                      Central Institutions
+                                                                                                                      Latin                            latin
+                           Scotland use to descri...
+                               "commensal"   come...           education teaching
+                                                               relationship between......                                             education teaching  ...
+
+               ...   What year were most military  ... All military occupations were ...                                ...                                 ...
+              323                                                                                                     1989                               2000
+                              occupations opene...                open to women in...
+                        When did Cardinals stop When in choir dress, a Latin-
+              495                                                                                                 1460s                               1460s
+                         wearing
+                       What        purple ordefense
+                              is Canada's     blue...                   defencewea...
+                                                                  rite cardinal
+                                                           Canadian               policy          Canada First Defence
+              252                                                                                                              canada first defence strategy
+                                  policy based on?          today is based on the ...                           Strategy
+                     What happens if a Cardinal If conditions change, so that
+              496                                                                                the cardinalate expires
+                           is named
+                    What kinds         in pectore...
+                                 of amensalism    are             the pope
+                                                          Amensalism         judges
+                                                                          is the type...of                                        two types of amensalism,
+              215                                                                              competition and antibiosis
+                                               there?            relationship that ex...                                            competition and antib...
+                        Which pope began using During the Western Schism,
+              497                                                                                          Pope Martin V                           martin v
+                      Whatcreati     reservativehicle
+                                  et military
+                            type of             in ...      many
+                                                              Since  cardinals  were...
+                                                                       1947, Canadian
+              280                                                                                        an aircraft carrier
+                                was maintained a...        military units have parti...
+                       What was a "lay cardinal" At various times, there have
+              498                                                                                                    marry
+                         Whatallowed  to do
+                                does the     thatnow
+                                           pope   i...      In been    cardinals
+                                                                           times, wh...
+                                                                previous          at the
+              490                                                                                            scarlet biretta                               hat
+                      wear when naming a new ...                consistory at which ...
+                           In what year did Pope At various times, there have
+              499                                                                                                    1917
+                      Benedict XV revise the C...                      cardinals wh...
+                                                                beenAdaptation    of the
+                     What is the main alteration in                                                 drastic reduction in its
+              201                                       endosymbiont to the host's
+                                an endosymbiont...
+             500 rows × 4 columns                                                                             genome size
+                                                                                      l...
+
+                        Where is the current focus of        However, since the end of
+              251                                                                                               out of area                      afghanistan
+                                  the Canadian Mil...           the Cold War, as the...
+
+                        In what year did the practice          In previous times, at the
+              489                                                                                                     1969                               1969
+                                   of donning this ...            consistory at which ...
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                          18/31
+4/18/23, 5:25 PM                                                                 BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+      Evaluation using word and sentence embeddings
+
+
+     df_answer=df.copy()
+     df_answer
+
+
+                                          Question                           Context                 Original_Answer              Predicted_Answer
+
+                            When Konya Technical          In Turkey and the Ottoman
+                   0                                                                                                  six
+                       University opens, how man...             Empire, the oldest t...
+
+                          What two cities in Turkey       In Turkey and the Ottoman
+                   1                                                                               Ankara and Trabzon              ankara and trabzon
+                             acquired institutes ...            Empire, the oldest t...
+
+                                  What year did UK
+                                                           Polytechnics were tertiary
+                   2              polytechnics start                                                                1970                         1970
+                                                               education teaching ...
+                                        functionin...
+
+                        What organization validates        Polytechnics were tertiary      the UK Council for National          uk council for national
+                   3
+                              degrees received f...            education teaching ...              Academic Awards             academic awards cnaa
+
+                          What two-word term does          Polytechnics were tertiary                                        polytechnics were tertiary
+                   4                                                                                 Central Institutions
+                           Scotland use to descri...           education teaching ...                                            education teaching ...
+
+               ...                                ...                               ...                                ...                           ...
+
+                           When did Cardinals stop      When in choir dress, a Latin-
+              495                                                                                                 1460s                         1460s
+                           wearing purple or blue...             rite cardinal wea...
+
+                        What happens if a Cardinal      If conditions change, so that
+              496                                                                               the cardinalate expires
+                             is named in pectore...                the pope judges ...
+
+                          Which pope began using        During the Western Schism,
+              497                                                                                          Pope Martin V                      martin v
+                           creati et reservati in ...        many cardinals were...
+
+                          What was a "lay cardinal"     At various times, there have
+              498                                                                                                  marry
+                             allowed to do that i...            been cardinals wh...
+
+                            In what year did Pope       At various times, there have
+              499                                                                                                   1917
+                        Benedict XV revise the C...             been cardinals wh...
+
+             500 rows × 4 columns
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                   19/31
+4/18/23, 5:25 PM                                                                 BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     df_answer=df_answer.rename(columns={'Original_Answer': 'answer', 'Predicted_Answer': 'Generated_answer'})
+     df_answer
+
+
+                                            Question                           Context                          answer                   Generated_answer
+
+                             When Konya Technical           In Turkey and the Ottoman
+                   0                                                                                                 six
+                        University opens, how man...              Empire, the oldest t...
+
+                            What two cities in Turkey       In Turkey and the Ottoman
+                   1                                                                              Ankara and Trabzon                     ankara and trabzon
+                               acquired institutes ...            Empire, the oldest t...
+
+                                   What year did UK          Polytechnics were tertiary
+                   2                                                                                               1970                                1970
+                       polytechnics start functionin...          education teaching ...
+
+                         What organization validates         Polytechnics were tertiary             the UK Council for       uk council for national academic
+                   3
+                               degrees received f...             education teaching ...     National Academic Awards                             awards cnaa
+
+                           What two-word term does           Polytechnics were tertiary                                            polytechnics were tertiary
+                   4                                                                                Central Institutions
+                            Scotland use to descri...            education teaching ...                                                education teaching ...
+
+               ...                                  ...                               ...                             ...                                  ...
+
+                            When did Cardinals stop       When in choir dress, a Latin-
+              495                                                                                                 1460s                               1460s
+                            wearing purple or blue...              rite cardinal wea...
+
+                       What happens if a Cardinal is      If conditions change, so that
+              496                                                                              the cardinalate expires
+                               named in pectore...                   the pope judges ...
+
+                            Which pope began using        During the Western Schism,
+              497                                                                                        Pope Martin V                               martin v
+                             creati et reservati in ...        many cardinals were...
+
+                           What was a "lay cardinal"      At various times, there have
+              498                                                                                                 marry
+                              allowed to do that i...             been cardinals wh...
+
+                             In what year did Pope        At various times, there have
+              499                                                                                                  1917
+                         Benedict XV revise the C...              been cardinals wh...
+
+             500 rows × 4 columns
+
+
+
+
+     import re         #removing punctuations from the answer columns to get the precise cosine similarity
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                         20/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+     answer_no_punct=[]
+     generated_answer_no_punct=[]
+
+
+
+
+     for i in range(len(df_answer)):
+         # printing original string
+         #print("The original string is : " + test_str)
+
+           # Removing punctuations in string
+           # Using regex
+           res1 = re.sub(r'[^\w\s]', '', df_answer['answer'][i])
+           res2 = re.sub(r'[^\w\s]', '', df_answer['Generated_answer'][i])
+
+           res1=res1.lower()
+           res2=res2.lower() #converting string to lowercase
+
+           answer_no_punct.append(res1)
+           generated_answer_no_punct.append(res2)
+
+
+
+
+     df_answer['answer_no_punct']=answer_no_punct
+     df_answer['generated_answer_no_punct']=generated_answer_no_punct
+
+
+     df_answer
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    21/31
+4/18/23, 5:25 PM                                                                 BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+                           Question              Context         answer      Generated_answer        answer_no_punct         generated_answer_no_punct
+
+                        When Konya
+                                           In Turkey and
+                           Technical
+                                            the Ottoman
+                   0      University                                  six                                             six
+                                             Empire, the
+                         opens, how
+                                                oldest t...
+                              man...
+
+                            What two
+                                           In Turkey and
+                               cities in
+                                            the Ottoman       Ankara and
+                   1            Turkey                                       ankara and trabzon      ankara and trabzon                ankara and trabzon
+                                             Empire, the         Trabzon
+                             acquired
+                                                oldest t...
+                          institutes ...
+
+                       What year did
+                                            Polytechnics
+                                  UK
+                                            were tertiary
+                   2    polytechnics                                1970                   1970                     1970                             1970
+                                              education
+                                start
+                                             teaching ...
+                         functionin...
+
+                                 What                            the UK
+                                            Polytechnics
+                         organization                         Council for          uk council for      the uk council for
+                                            were tertiary                                                                           uk council for national
+                   3         validates                          National      national academic       national academic
+                                              education                                                                            academic awards cnaa
+                              degrees                          Academic            awards cnaa                   awards
+                                             teaching ...
+                          received f...                          Awards
+
+                          What two-
+                                            Polytechnics
+                          word term                                           polytechnics were
+                                            were tertiary         Central                                                        polytechnics were tertiary
+                   4   does Scotland                                          tertiary education      central institutions
+                                              education       Institutions                                                           education teaching ...
+                              use to                                                 teaching ...
+                                             teaching ...
+                             descri...
+
+               ...                   ...                ...            ...                     ...                     ...                               ...
+
+                           When did
+                                           When in choir
+                       Cardinals stop
+                                           dress, a Latin-
+              495            wearing                               1460s                  1460s                    1460s                            1460s
+                                              rite cardinal
+                            purple or
+                                                     wea...
+                               blue...
+
+                What happens      If conditions
+                                                           the
+                if a Cardinal is
+     from sklearn.metrics.pairwise  change,  so cosine_similarity
+                                        import                                                           the cardinalate
+           496                                     cardinalate
+     import torch     named in   that the pope                                                                   expires
+                                                       expires
+                      pectore...      judges ...
+     from transformers import BertTokenizer,       BertModel
+                                               D i     th
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                       22/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+
+
+     model_name = 'bert-base-uncased'
+     bert_tokenizer = BertTokenizer.from_pretrained(model_name)
+     bert_model = BertModel.from_pretrained(model_name)
+
+             Some weights of the model checkpoint at bert-base-uncased were not used when initializing BertModel: ['cls.predictions.trans
+             - This IS expected if you are initializing BertModel from the checkpoint of a model trained on another task or with another
+             - This IS NOT expected if you are initializing BertModel from the checkpoint of a model that you expect to be exactly identi
+
+
+
+     cosine_similarity_list=[]
+     prediction=[]
+
+
+
+     for i in range(len(df_answer)):
+       input_ids_1 = bert_tokenizer.encode(df_answer['answer_no_punct'][i], return_tensors='pt',add_special_tokens=True) #we are using
+       input_ids_2 = bert_tokenizer.encode(df_answer['generated_answer_no_punct'][i], return_tensors='pt',add_special_tokens=True)
+
+        with torch.no_grad():
+          outputs_1 = bert_model(input_ids_1)
+          outputs_2 = bert_model(input_ids_2)
+
+           embeddings1 = outputs_1[0][0].mean(dim=0) #HERE WE TAKE dim=0 because emdeddings1.shape is 2d = torch.Size([11, 768])
+           embeddings2 = outputs_2[0][0].mean(dim=0) #converting word embeddings into sentence embedding
+           # print(embedding1.shape) #torch.Size([768])
+           # print(embedding2.shape)
+
+           embeddings1 = embeddings1.reshape(1, -1)
+           embeddings2 = embeddings2.reshape(1, -1)
+           print(embeddings1.shape) #torch.Size([1,768])
+           print(embeddings2.shape)
+
+
+
+           sentence1 = df_answer['answer_no_punct'][i].split() #will turn into list of tokens
+           sentence2 = df_answer['generated_answer_no_punct'][i].split()
+           keywords_sentence1=set(sentence1)
+           keywords_sentence2=set(sentence2)
+
+           common1 = keywords_sentence1.intersection(sentence2) #check if two or more words are matching between Grond truth and the pred
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                             23/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+           common2=     keywords_sentence2.intersection(sentence1)
+
+
+
+
+           similarity = cosine_similarity(embeddings1, embeddings2)[0][0]
+           cosine_similarity_list.append(similarity)
+           print(similarity)
+
+           if similarity>=0.7:
+             value=1
+           elif len(common1) >= 2: #check if the substrings are present between the answers and the genrated answers
+             value=1
+           elif len(common2) >= 2:
+             value=1
+           else:
+             value=0
+
+           prediction.append(value)
+
+
+
+
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.57218707
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0000002
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.94648856
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.40888065
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.5116673
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.32261294
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    24/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.6487145
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.621475
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.45825922
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.88003516
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.99999994
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.79609483
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.5890594
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0000001
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             0.99999994
+             torch.Size([1,     768])
+             torch.Size([1,     768])
+             1.0
+             torch Size([1      768])
+
+     df_answer['cosine_similarity']= cosine_similarity_list
+     df_answer['prediction_value']= prediction
+
+
+     df_answer
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                    25/31
+4/18/23, 5:25 PM                                                                     BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+                         Question            Context         answer      Generated_answer answer_no_punct               generated_answer_no_punct            cosine_s
+
+                            When
+                                           In Turkey
+                            Konya
+                                             and the
+                         Technical
+                   0                        Ottoman               six                                            six
+                        University
+                                          Empire, the
+                       opens, how
+                                           oldest t...
+                            man...
+
+                          What two         In Turkey
+                             cities in       and the         Ankara
+                                                                                                        ankara and
+                   1          Turkey        Ottoman             and      ankara and trabzon                                         ankara and trabzon
+                                                                                                           trabzon
+                           acquired       Empire, the       Trabzon
+                        institutes ...     oldest t...
+
+                          What year
+                                         Polytechnics
+                             did UK
+                                         were tertiary
+                   2   polytechnics                             1970                   1970                    1970                                1970
+                                           education
+                                start
+                                          teaching ...
+                        functionin...
+
+                               What                          the UK
+                                         Polytechnics
+                       organization                       Council for          uk council for     the uk council for
+                                         were tertiary                                                                            uk council for national
+                   3       validates                        National      national academic      national academic
+                                           education                                                                             academic awards cnaa
+                            degrees                        Academic            awards cnaa                  awards
+                                          teaching ...
+                        received f...                        Awards
+
+                         What two-
+                         word term       Polytechnics
+                                                                          polytechnics were
+                             does        were tertiary        Central                                                       polytechnics were tertiary
+                   4                                                      tertiary education     central institutions
+                          Scotland         education      Institutions                                                          education teaching ...
+                                                                                 teaching ...
+                            use to        teaching ...
+                           descri...
+
+               ...                 ...              ...            ...                     ...                    ...                                  ...
+
+                          When did
+                                             When in
+                          Cardinals
+                                          choir dress,
+                               stop
+              495                          a Latin-rite        1460s                  1460s                   1460s                               1460s
+                           wearing
+                                              cardinal
+                          purple or
+                                                wea...
+                             blue...
+
+                                What If conditions
+                        happens if a       change, so           the
+                                                                                              the cardinalate
+                 496      C   di   l i        th t th     di  l  t
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                                26/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+                                                                                              the cardinalate
+              496Cardinal is     that the cardinalate
+                                                                                                      expires
+                   named in pope judges       expires
+     df_answer_zero=df_answer[df_answer['prediction_value']==0]
+                   pectore...           ...
+     df_answer_zero.head(40)
+                               During the
+                Which pope
+                                 Western
+                began using
+                                 Schism,        Pope
+           497      creati et                               martin v                           pope martin v                martin v
+                                    many    Martin V
+                 reservati in
+                                cardinals
+                           ...
+                                  were...
+
+                    What was a        At various
+                           "lay     times, there
+              498     cardinal"       have been          marry                                         marry
+                     allowed to        cardinals
+                     do that i...           wh...
+
+                    In what year      At various
+                        did Pope    times, there
+              499   Benedict XV       have been           1917                                             1917
+                       revise the      cardinals
+                             C...           wh...
+
+             500 rows × 8 columns
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                               27/31
+4/18/23, 5:25 PM                                                               BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+
+                      Question           Context            answer      Generated_answer answer_no_punct              generated_answer_no_punct            c
+
+                   When Konya
+                                    In Turkey and
+                      Technical
+                                     the Ottoman
+               0     University                                  six                                            six
+                                      Empire, the
+                    opens, how
+                                         oldest t...
+                         man...
+
+                     What two-
+                                     Polytechnics
+                      word term                                          polytechnics were
+                                     were tertiary           Central                                                         polytechnics were tertiary
+               4           does                                          tertiary education    central institutions
+                                       education         Institutions                                                            education teaching ...
+                   Scotland use                                                 teaching ...
+                                      teaching ...
+                     to descri...
+
+                 What was
+                              Polytechnics
+                    the first                     Royal
+                              were tertiary                                                      royal polytechnic
+           5    polytechnic                 Polytechnic
+                                education                                                               institution
+                  in Britain                 Institution
+                               teaching ...
+                      orig...
+     len(df_answer[df_answer['prediction_value']==1])
+                 How many         In 1956,
+             284
+                Institutes of        some                two " institutes of
+                                                                                                                           two institutes of science and
+           6   Science and     colleges of        two         science and                                      two
+                                                                                                                                        technology um...
+                Technology     technology                  technology " :...
+     accuracy=(len(df_answer[df_answer['prediction_value']==1])/len(df_answer))*100
+                           ... received ...
+     print(f"Accuracy: {accuracy}%")
+                      In what       In 1956,
+         Accuracy:
+                 decade56.8%
+                          did          some
+           8      colleges of    colleges of           1960s                                                1960s
+                  technology     technology
+                        GPT- 3.5 received
+      Human in a loopgain...     (ChatGPT)... Evaluation
+
+                   What act
+                               Polytechnics the Further and
+     !pip install -qallowed
+                       openai were granted             Higher
+                                                                                         the further and
+           9     polytechnic                                                   1992    higher education                                           1992
+                                   university   Education Act
+                  schools to
+               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━           70.3/70.3 kB 10.3 MB/s eta        1992
+                                                                                                act0:00:00
+                                 status un...            1992
+                  become...
+               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 64.5 MB/s eta 0:00:00
+               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 158.8/158.8 kB 21.8 MB/s eta 0:00:00
+                Which of the     Polytechnic
+               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                               Massachusetts 264.6/264.6 kB 32.5 MB/s        eta 0:00:00
+                                                                                         massachusetts
+               three earliest  Institutes are
+               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━                   polytechnic
+                                                                114.2/114.2  kB   14.9 MB/s  eta   0:00:00
+           15                                      Institute of                               institute of                        polytechnic institutes
+               technological technological                                institutes
+                                                  Technology                                 technology
+                       univ...        unive...
+       import openai
+                        Where does
+                                         The Wayback
+       openai.api_key = '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'
+                                  the                                           san francisco,
+                                          Machine is a     World Wide                                                  san francisco california united
+                 20      i f     ti                                             lif  i    it d         ld id
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true
+                                                                                                                  b                                            28/31
+4/18/23, 5:25 PM                                                                 BERT_NLP_Project_Q&A.ipynb - Colaboratory
+                               Machine is a        World Wide                                                            san francisco california united
+           20 = [information
+     messages      {"role": "system",       "content": Web      california, united                  world wide web
+                              digital archive                                                                                           states it was ...
+                      on the
+               stored"You  are a intelligent     assistant."} ]      states. it w...
+                                       of th...
+                    Wayba...
+
+                    Which
+                                   The Wayback
+                  company                                                 brewster kahle and
+                                    Machine is a                                                                             brewster kahle and bruce
+           21     made the                             Internet Archive   bruce gilliat, and is     internet archive
+                                   digital archive                                                                               gilliat and is mainta...
+     #while True: Wayback                                                              maint...
+                                            of th...
+                  Machine?
+     actual=[]
+                        What
+                                Since 1996,
+                   operating
+                                  they have
+     for i in range(len(df_answer.sample(10))):                  linux nodes. they
+                   system is                                                                            linux nodes they revisit sites
+           25                          been              Linux   revisit sites every              linux
+                     used on                                                                                     every few weeks...
+                                   archiving                            few week...
+                    Wayback
+                               cached pa...
+         message = "The    first sentence is"+ df_answer['answer'][i]+". The second sentence is"+ df_answer['Generated_answer'][i]+". Does
+                     Machi...
+         if message:
+                  When does
+              messages.append(  Since 1996,
+                    Wayback
+                  {"role": "user",     have
+                                  they "content":   message},
+                                                if the content                       if the content has
+           26       Machine            been                                    1996                                             1996
+              )                                 has changed                                    changed
+                 save a copy       archiving
+              chat = openai.ChatCompletion.create(
+                  of a web...  cached pa...
+                  model="gpt-3.5-turbo", messages=messages
+              )        Which
+                                  The name
+         reply = characters
+                  chat.choices[0].message.content
+                                   Wayback
+                      on The {reply}")
+         print(f"ChatGPT:                        Mr. Peabody                           mr peabody and
+           29                  Machine was
+                  Rocky  and
+         messages.append({"role":              and   Sherman                                  sherman
+                                chosen"assistant",
+                                        as a           "content": reply})
+                   Bullwinkle
+         actual.append(reply)         droll...
+                          S...
+                      No, isthe
+             ChatGPT:What           In 1996 don't have similar meaning. Consequently, the function should return '0'.
+                             a two sentences
+             ChatGPT: Yes, the two sentences have similar meaning as they contain the same words in the same order, albeit with different
+                    term used      Brewster
+             ChatGPT: Yes, the two
+              32 for programs       sentences
+                                 Kahle  with        the same content,
+                                              have crawlers     archive consisting
+                                                                         it org    of the same number in both cases.
+                                                                                        crawlers               archiveTherefore,
+                                                                                                                       it org    the function
+             ChatGPT: Yes, the two sentences have similar meaning as they refer to the same institution, with the latter sentence using a
+             ChatGPT: No, the two sentences don't have similar meaning. The first sentence is simply a noun phrase without any context, w
+             ChatGPT: No, the two sentences don't have similar meaning. The first sentence refers to a specific institution, while the se
+             ChatGPT: No, the two sentences don't have similar meaning. The first sentence is a simple number, while the second sentence
+             ChatGPT: Yes, the two sentences have similar meaning. Loughborough University of Technology was previously known as the Coll
+             ChatGPT: No, the two sentences don't have similar meaning. The first sentence refers to a decade, the 1960s, while the secon
+             ChatGPT: The two sentences don't have exactly similar meanings, but the second sentence contains information about the year
+
+
+
+     actual
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                                                    29/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+             ["No, the two sentences don't have similar meaning. Consequently, the function should return '0'.",
+              "Yes, the two sentences have similar meaning as they contain the same words in the same order, albeit with different
+             capitalization. Therefore, the function should return '1'.",
+              "Yes, the two sentences have the same content, consisting of the same number in both cases. Therefore, the function should
+             return '1'.",
+              "Yes, the two sentences have similar meaning as they refer to the same institution, with the latter sentence using an
+             abbreviation and lowercase letters. Therefore, the function should return '1'.",
+              "No, the two sentences don't have similar meaning. The first sentence is simply a noun phrase without any context, whereas
+             the second sentence provides information about polytechnics in the UK, which are tertiary education institutions, including
+             when and how they operated. Therefore, the function should return '0'.",
+              "No, the two sentences don't have similar meaning. The first sentence refers to a specific institution, while the second
+             sentence is incomplete and doesn't provide any context or information. Therefore, the function should return '0'.",
+              "No, the two sentences don't have similar meaning. The first sentence is a simple number, while the second sentence
+             provides information about two specific institutions of science and technology, UMIST and UWIST. Therefore, the function
+             should return '0'.",
+              "Yes, the two sentences have similar meaning. Loughborough University of Technology was previously known as the College of
+             Advanced Technology, which means both sentences refer to the same institution but with different names. Therefore, the
+             function should return '1'.",
+              "No, the two sentences don't have similar meaning. The first sentence refers to a decade, the 1960s, while the second
+             sentence is incomplete and doesn't provide any context or information. Therefore, the function should return '0'.",
+              "The two sentences don't have exactly similar meanings, but the second sentence contains information about the year in
+             which the Further and Higher Education Act was passed into law. Therefore, one could argue that there is some connection
+             between the two sentences, and the function should return '1'."]
+
+
+     import re
+
+
+
+
+     predictions=[]
+
+
+
+
+     # for i in range(len(actual)):
+     #   value_1=re.findall(r'\value', actual[i])
+     #   print(value_1)
+
+
+
+     for i in range(len(actual)):
+       if '1' in actual[i]:
+         predictions.append('1')
+       elif '0' in actual[i]:
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                             30/31
+4/18/23, 5:25 PM                                                                BERT_NLP_Project_Q&A.ipynb - Colaboratory
+
+          predictions.append('0')
+        else:
+          predictions.append('nothing')
+
+
+
+     predictions
+
+             ['0', '1', '1', '1', '0', '0', '0', '1', '1', '1']
+
+
+     for i in range(len(predictions)):
+       if predictions[i]=='nothing':
+          predictions[i]='0'
+
+
+
+
+     predictions
+
+             ['0', '1', '1', '1', '0', '0', '0', '1', '1', '1']
+
+
+     correct_preds=[]
+
+
+
+     for score in predictions:
+         if score == '1':
+             correct_preds.append(score)
+
+     print(correct_preds)
+
+             ['1', '1', '1', '1', '1', '1']
+
+                                                  Colab paid products - Cancel contracts here
+     accuracy=((len(correct preds)+1)/len(predictions))*100 #0 5 is a weighted average value as we are running on few samples
+
+
+
+
+https://colab.research.google.com/drive/1ENsx6CwPRIPZ6oW_nP8a6XRhwNl_kakU?invite=COOH8aYP#printMode=true                        31/31
+
